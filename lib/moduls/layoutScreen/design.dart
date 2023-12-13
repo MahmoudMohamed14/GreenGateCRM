@@ -33,6 +33,7 @@ class Design{
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 //mainAxisSize: MainAxisSize.min,
 
                 children: [
@@ -40,6 +41,7 @@ class Design{
                     child: Column(
                       mainAxisSize:MainAxisSize.min ,
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Text('${model.name}',style: TextStyle(fontWeight:FontWeight.bold,color:LayoutCubit.get(context).indexSelect ==index?ColorManager.white:ColorManager.primary),),
                         SizedBox(height: 10,),
@@ -160,7 +162,8 @@ class Design{
  static Widget sellerDesign(context,text){
    return  GestureDetector(
      onTap: (){
-       LayoutCubit.get(context).getSeller(text);
+       LayoutCubit.get(context).sellerId=text;
+       LayoutCubit.get(context).getSeller();
        LayoutCubit.get(context).changeHomeButton(0);
      },
      child: Column(
