@@ -8,6 +8,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:greengate/models/clientModel.dart';
+import 'package:greengate/moduls/componant/componant.dart';
 import 'package:greengate/moduls/componant/local/cache_helper.dart';
 import 'package:greengate/moduls/componant/remote/dioHelper.dart';
 import 'package:greengate/moduls/layoutScreen/layout_status.dart';
@@ -121,23 +122,33 @@ String date=DateFormat.yMd().format(DateTime.now());
 
 
   }
+  String messageResult='';
   Future updateclientSql( int? id,String state,String note,context)  async {
   emit(ClientActionLoadingState());
+  messageResult='';
     try{
       Response response=await DioHelper.dio.post('editClient.php',queryParameters: {'id':id,'state':state,'note':note});
       if(response.statusCode==200){
-        // print(i);
-        // valuepross=(i+1)/suddenNormalList.length*100;
-        //getEmit();
-        emit(ClientActionSuccessState());
-        Navigator.of(context).pop(true);
-        await getClientBySeller();
+
+
+        if(response.data.toString().contains('ActionSuccess'))
+          {
+            messageResult=response.data.toString();
+            emit(ClientActionSuccessState());
+           // Navigator.of(context).pop(true);
+            await getClientBySeller();
+          }
+
 
         print("###############################");
         print(response.data);
 
+      }else{
+        messageResult=response.data.toString();
+        emit(ClientActionErrorState());
       }
     }catch(error){
+      messageResult=error.toString();
       emit(ClientActionErrorState());
       print("Clint Action "+error.toString());
       //emit(HiringCallErrorState());
@@ -233,7 +244,10 @@ String date=DateFormat.yMd().format(DateTime.now());
   List<ClientModel>listNotInterested=[];
   List<ClientModel>listFollowUP=[];
   List<ClientModel>listFollowMeeting=[];
+  List<ClientModel>listDealDone=[];
   List<ClientModel>listNotCall=[];
+  List<ClientModel>listFreshLead=[];
+
   //List<String>listGrid=['Not Call','No Answer Potential','Cold Call','No Answer','Not Interested','Follow UP','Follow Meeting'];
  List<String>listSeller=[];
   Future<void> getAllClient() async {
@@ -245,6 +259,8 @@ String date=DateFormat.yMd().format(DateTime.now());
         var res=json.decode(response.data);
         //  showToast(text: value.data.toString(), state: ToastState.SUCCESS);
         if(res.length>0){
+
+          sellerId='';
           listSeller=[];
           listAllClient=[];
           listInterested=[];
@@ -252,24 +268,46 @@ String date=DateFormat.yMd().format(DateTime.now());
           listNoAnswer=[];
           listNotInterested=[];
           listFollowUP=[];
+          listDealDone=[];
           listFollowMeeting=[];
           listNotCall=[];
+          listFreshLead=[];
           print(res);
 
           res.forEach((element){
             if(element['state']=='Interested') {
+
               listInterested.add(ClientModel.fromJson(element));
-            } else if(element['state']=='Closed') {
+            }
+            else if(element['state']=='Closed') {
+
               listClosedCall.add(ClientModel.fromJson(element));
-            } else if(element['state']=='No Answer') {
+            }
+            else if(element['state']=='Deal Done') {
+
+              listDealDone.add(ClientModel.fromJson(element));
+            }
+            else if(element['state']=='No Answer') {
+
               listNoAnswer.add(ClientModel.fromJson(element));
-            } else if(element['state']=='Not Interested') {
+            }
+            else if(element['state']=='Not Interested') {
+
               listNotInterested.add(ClientModel.fromJson(element));
-            } else if(element['state']=='Follow UP') {
+            }
+            else if(element['state']=='Follow UP') {
+
               listFollowUP.add(ClientModel.fromJson(element));
-            } else if(element['state']=='Follow Meeting') {
+            }
+            else if(element['state']=='Follow Meeting') {
+
               listFollowMeeting.add(ClientModel.fromJson(element));
-            } else {
+            }
+            else if(element['state']=='Fresh Leads') {
+
+              listFreshLead.add(ClientModel.fromJson(element));
+            }
+            else if(element['state'].toString().isEmpty){
               listNotCall.add(ClientModel.fromJson(element));
             }
             listSeller.add(element['seller']);
@@ -299,29 +337,43 @@ String date=DateFormat.yMd().format(DateTime.now());
   }
   Future<void> getClientBySeller() async {
     emit(ClientGetSellerLoadingState());
-
+    messageResult='';
     try{
       Response response=await  DioHelper.dio.post('getClientid.php',queryParameters:{'seller':"${CacheHelper.getData(key: 'myId')}"} );
       if (response.statusCode == 200 ) {
+
         var res=json.decode(response.data);
         //  showToast(text: value.data.toString(), state: ToastState.SUCCESS);
         if(res.length>0){
+
           listAllClient=[];
           listInterested=[];
           listClosedCall=[];
           listNoAnswer=[];
           listNotInterested=[];
           listFollowUP=[];
+          listDealDone=[];
           listFollowMeeting=[];
           listNotCall=[];
+          listFreshLead=[];
         //  print(res);
 
           res.forEach((element){
             if(element['state']=='Interested') {
               listInterested.add(ClientModel.fromJson(element));
-            } else if(element['state']=='Closed') {
+            }
+            else if(element['state']=='Fresh Leads') {
+
+              listFreshLead.add(ClientModel.fromJson(element));
+            }
+            else if(element['state']=='Closed') {
               listClosedCall.add(ClientModel.fromJson(element));
-            } else if(element['state']=='No Answer') {
+            }
+            else if(element['state']=='Deal Done') {
+              listDealDone.add(ClientModel.fromJson(element));
+            }
+            else if(element['state']=='No Answer')
+            {
               listNoAnswer.add(ClientModel.fromJson(element));
             } else if(element['state']=='Not Interested') {
               listNotInterested.add(ClientModel.fromJson(element));
@@ -329,7 +381,7 @@ String date=DateFormat.yMd().format(DateTime.now());
               listFollowUP.add(ClientModel.fromJson(element));
             } else if(element['state']=='Follow Meeting') {
               listFollowMeeting.add(ClientModel.fromJson(element));
-            } else {
+            } else if(element['state'].toString().isEmpty){
               listNotCall.add(ClientModel.fromJson(element));
             }
 
@@ -345,11 +397,16 @@ String date=DateFormat.yMd().format(DateTime.now());
 
         print(response.statusCode);
 
-      } else {print('Get All Data Error: ${response.data}');}
+      } else {
+        emit(ClientGetSellerErrorState());
+        messageResult=response.data.toString();
+       // print('Get All Data Error: ${response.data}');
+      }
     }catch(onError){
+      messageResult=onError.toString();
       emit(ClientGetSellerErrorState());
 
-      print('Get All Data Error: ${onError.toString()}');
+      print('Get Client Seller Data Error: ${onError.toString()}');
       print(onError);
     }
 
@@ -368,26 +425,37 @@ void  indexOfListSelect(index){
 
 }
   String dropValue='No Answer';
-  List<String>dropValueList=['Interested','Closed','No Answer','Not Interested','Follow UP','Follow Meeting'];
+  List<String>dropValueList=['Interested','Closed','No Answer','Not Interested','Follow UP','Follow Meeting','Deal Done'];
   void dropButtonChange({vlu}) {
     dropValue = vlu;
     emit(HiringDropState ());
   }
-void getSeller(seller){
+  String sellerId='';
+  int getlengthofCalled(){
+    return listClosedCall.length+listDealDone.length+listInterested.length+listNoAnswer.length+listNotInterested.length+ listFollowUP.length+listFollowMeeting.length;  }
+void getSeller({String date=''}){
   listInterested=[];
   listClosedCall=[];
   listNoAnswer=[];
   listNotInterested=[];
   listFollowUP=[];
   listFollowMeeting=[];
+  listDealDone=[];
   listNotCall=[];
+  listFreshLead=[];
     listAllClient.forEach((element) {
-      if(element.seller==seller){
+      if(element.seller==sellerId&&date.isNotEmpty&&date==element.date){
       if(element.state=='Interested') {
         listInterested.add(element);
       }
       else if(element.state=='Closed') {
         listClosedCall.add(element);
+      }
+      else if(element.state=='Fresh Leads') {
+        listFreshLead.add(element);
+      }
+      else if(element.state=='Deal Done') {
+        listDealDone.add(element);
       }
       else if(element.state=='No Answer') {
         listNoAnswer.add(element);
@@ -401,20 +469,50 @@ void getSeller(seller){
       else if(element.state=='Follow Meeting') {
         listFollowMeeting.add(element);
       }
-      else {
+      else if(element.state!.isEmpty) {
         listNotCall.add(element);
       }}
+      else if(element.seller==sellerId&&date.isEmpty){
+        if(element.state=='Interested') {
+          listInterested.add(element);
+        }
+        else if(element.state=='Closed') {
+          listClosedCall.add(element);
+        }
+        else if(element.state=='Deal Done') {
+          listDealDone.add(element);
+        }
+        else if(element.state=='No Answer') {
+          listNoAnswer.add(element);
+        }
+        else if(element.state=='Not Interested') {
+          listNotInterested.add(element);
+        }
+        else if(element.state=='Follow UP') {
+          listFollowUP.add(element);
+        }
+        else if(element.state=='Follow Meeting') {
+          listFollowMeeting.add(element);
+        }
+        else if(element.state!.isEmpty) {
+          listNotCall.add(element);
+        }}
 
     });
     getEmit();
 }
 Future<void> whatsApp(num) async {
-    Uri uri= Uri.parse('whatsapp://send?phone=$num&&text=');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      // Handle error, e.g., show an error dialog
-      print('Could not launch WhatsApp');
+    Uri uri1= Uri.parse('whatsapp://send?phone=$num&&text=');
+    Uri uri2= Uri.parse("wa.me/$num?text=${Uri.parse('')}");
+ // Uri uri1= Uri.parse('https://api.whatsapp.com/send?phone=$num&&text=');
+//  Uri uri2= Uri.parse("https://wa.me/$num/?text=${Uri.parse('')}");
+    if (await canLaunchUrl(uri1)) {
+      await launchUrl(uri1);
+    } else if(await canLaunchUrl(uri2)) {
+      await launchUrl(uri2);
+     // showToast(text: 'NO WhatsApp install in this dvice ', state: ToastState.ERROR);
+    }else{
+      showToast(text: 'NO WhatsApp install in this dvice ', state: ToastState.ERROR);
     }
 }
 

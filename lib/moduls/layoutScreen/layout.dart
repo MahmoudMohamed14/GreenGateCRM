@@ -1,19 +1,15 @@
 
 
 
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:greengate/moduls/componant/componant.dart';
 import 'package:greengate/moduls/componant/local/cache_helper.dart';
 import 'package:greengate/moduls/constant/color_manager.dart';
-import 'package:greengate/moduls/layoutScreen/addClient.dart';
-import 'package:greengate/moduls/layoutScreen/design.dart';
 import 'package:greengate/moduls/layoutScreen/layout_cubit.dart';
 import 'package:greengate/moduls/layoutScreen/layout_status.dart';
-import 'package:greengate/moduls/screens/interested_screen.dart';
-import 'package:greengate/moduls/screens/not_call.dart';
+import 'package:intl/intl.dart';
 
 
 class  LayoutScreen extends StatelessWidget {
@@ -36,14 +32,37 @@ class  LayoutScreen extends StatelessWidget {
               var cubit=  LayoutCubit.get(context);
               return Scaffold(
                   appBar: AppBar(
+                    leadingWidth: 100,
+                    leading:CacheHelper.getData(key: 'control') ?
+                  Row(
+                      children: [
+                       if(cubit.indexHomeButton==0) IconButton(onPressed: () async {
+                        await cubit.getAllClient();
+                       },icon:const Icon(Icons.sync),),
+                        IconButton(onPressed: (){
+                          showDatePicker(context: context, initialDate: DateTime.now(), firstDate:
+                          DateTime.parse('2023-12-01') , lastDate: DateTime.parse('2030-12-31'))
+                              .then((value){
+                                cubit.getSeller(date:DateFormat.yMd().format(value!).toString() );
+                                print(DateFormat.yMd().format(value).toString());
+                           // expiredIDControl.text=DateFormat.yMd().format(value!);
+                            cubit.getEmit();
+
+
+                          }).catchError((error){
+                            print('date error'+error.toString());
+                          });
+                        },icon:const Icon(Icons.calendar_month),),
+                      ],
+                    ):null,
                     centerTitle: true,
                     actions: [
-                      Platform.isWindows? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: IconButton(onPressed: (){
-                         navigateTo(context, UploadClientScreen());
-                        }, icon: Icon(Icons.file_upload_outlined)),
-                      ):SizedBox(),
+                      // Platform.isWindows? Padding(
+                      //   padding: const EdgeInsets.symmetric(horizontal: 10),
+                      //   child: IconButton(onPressed: (){
+                      //    navigateTo(context, UploadClientScreen());
+                      //   }, icon: Icon(Icons.file_upload_outlined)),
+                      // ):SizedBox(),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: IconButton(onPressed: (){
@@ -63,6 +82,7 @@ class  LayoutScreen extends StatelessWidget {
                   body:CacheHelper.getData(key: 'control')? cubit.listAdminScreen[cubit.indexHomeButton]:cubit.listScreen[cubit.indexHomeButton],
                   bottomNavigationBar: BottomNavigationBar(
                 type: BottomNavigationBarType.fixed,
+                backgroundColor: Colors.white,
                 elevation: 0,
 
 

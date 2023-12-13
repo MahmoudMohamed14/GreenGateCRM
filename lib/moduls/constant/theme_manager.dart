@@ -17,6 +17,7 @@ ThemeData getApplicationTheme(context) {
     // main colors
       primaryColor: ColorManager.primary,
 
+
       primaryColorLight: ColorManager.lightPrimary,
       primaryColorDark: ColorManager.darkPrimary,
       disabledColor: ColorManager.grey1,
@@ -26,6 +27,12 @@ ThemeData getApplicationTheme(context) {
           secondary: ColorManager.primary
       ),
     // cardview theme
+      dropdownMenuTheme: DropdownMenuThemeData(
+        inputDecorationTheme: InputDecorationTheme(
+         fillColor: ColorManager.primary,
+             outlineBorder: BorderSide(color: ColorManager.primary)
+        )
+      ),
     cardTheme: CardTheme(
       elevation: AppSize.s4,
       color: ColorManager.white,
@@ -47,8 +54,6 @@ ThemeData getApplicationTheme(context) {
         actionsIconTheme: IconThemeData(color: ColorManager.primary),
 
         systemOverlayStyle: SystemUiOverlayStyle(
-
-
           statusBarBrightness: Brightness.light,
               statusBarColor: ColorManager.white,
           statusBarIconBrightness: Brightness.dark
@@ -74,6 +79,7 @@ ThemeData getApplicationTheme(context) {
             textStyle: getRegularStyle(
                 color: ColorManager.white, fontSize: FontSize.s17),
             primary: ColorManager.primary,
+
             shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(AppSize.s12)))),
 
@@ -95,7 +101,10 @@ ThemeData getApplicationTheme(context) {
         // hint style
         hintStyle:getRegularStyle(color: ColorManager.grey, fontSize: FontSize.s14),
         labelStyle:getMediumStyle(color: ColorManager.grey, fontSize: FontSize.s14),
-        errorStyle: getRegularStyle(color: ColorManager.error),)
+        errorStyle: getRegularStyle(color: ColorManager.error),),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: Colors.white
+      )
 
         // enabled border style
         // enabledBorder: OutlineInputBorder(

@@ -31,6 +31,7 @@ class  NotCallScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(20),
                 child: ListView.builder(
                     key: listKey,
+                   // reverse: true,
 
 
                     shrinkWrap: true,
@@ -39,7 +40,7 @@ class  NotCallScreen extends StatelessWidget {
                     scrollDirection: Axis.vertical,
 
                     itemBuilder: (context, index) {
-                      return Design.newClentModel(cubit.listNotCall[index],context,index);
+                      return Design.newClentModel(cubit.listNotCall.reversed.toList()[index],context,index);
 
                     }
 

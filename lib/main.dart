@@ -45,7 +45,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        CacheHelper.getData(key: 'isLogin')!=null?CacheHelper.getData(key: 'control')??false?BlocProvider<LayoutCubit>(create: (context)=>LayoutCubit()..getAllClient()):BlocProvider<LayoutCubit>(create: (context)=>LayoutCubit()..getClientBySeller()): BlocProvider<LayoutCubit>(create: (context)=>LayoutCubit())
+        CacheHelper.getData(key: 'isLogin')!=null?CacheHelper.getData(key: 'control')??false?BlocProvider<LayoutCubit>(create: (context)=>LayoutCubit()..getAllClient()..changeHomeButton(0)):BlocProvider<LayoutCubit>(create: (context)=>LayoutCubit()..getClientBySeller()..changeHomeButton(0)): BlocProvider<LayoutCubit>(create: (context)=>LayoutCubit())
 
       ],
       

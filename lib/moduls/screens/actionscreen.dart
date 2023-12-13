@@ -19,6 +19,17 @@ class ActionScreen extends StatelessWidget {
     LayoutCubit.get(context).dropValue= model!.state!.isNotEmpty?model!.state??'No Answer':'No Answer';
     return BlocConsumer<LayoutCubit,LayoutStates>(
         listener: (context,state){
+          if(state is ClientActionSuccessState ){
+            showToast(text: 'Action Done Wait TO GET Data', state: ToastState.SUCCESS);
+          }else if(state is ClientGetSellerSuccessState){
+            Navigator.of(context).pop(true);
+          }else if(state is ClientActionErrorState||state is ClientGetSellerErrorState){
+            if(LayoutCubit.get(context).messageResult.contains("Failed host lookup: 'sjiappeg.sji-eg.com'")){
+              showToast(text: 'No Internet OR Check Internet', state: ToastState.ERROR);
+            }else{
+              showToast(text: LayoutCubit.get(context).messageResult, state: ToastState.ERROR);
+            }
+          }
 
         },
     builder: (context,state){
@@ -45,9 +56,12 @@ class ActionScreen extends StatelessWidget {
                   isExpanded: true,
                   iconSize: 40,
 
+                  //  elevation: 0,
+                  dropdownColor: ColorManager.white,
+
 
                   value: cubit.dropValue,
-
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
 
                   onChanged: ( String?value){
 
@@ -56,7 +70,9 @@ class ActionScreen extends StatelessWidget {
 
                   },
 
-                  items:List.generate(cubit.dropValueList.length, (index) =>   DropdownMenuItem<String>(child: Text(cubit.dropValueList[index],style: TextStyle(color: ColorManager.primary,fontWeight: FontWeight.bold,fontSize: 20),),value: cubit.dropValueList[index],))
+                  items:List.generate(cubit.dropValueList.length, (index) =>   DropdownMenuItem<String>(
+
+                    child: Text(cubit.dropValueList[index],style: TextStyle(color: ColorManager.primary,fontWeight: FontWeight.bold,fontSize: 20),),value: cubit.dropValueList[index],))
               ),
             ),
             SizedBox(height: 20,),
