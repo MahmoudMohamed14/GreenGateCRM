@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:greengate/models/clientModel.dart';
 import 'package:greengate/moduls/componant/componant.dart';
+import 'package:greengate/moduls/componant/services/notifi_service.dart';
 import 'package:greengate/moduls/constant/color_manager.dart';
 import 'package:greengate/moduls/layoutScreen/layout_cubit.dart';
 import 'package:greengate/moduls/layoutScreen/layout_status.dart';
@@ -21,6 +22,8 @@ class ActionScreen extends StatelessWidget {
         listener: (context,state){
           if(state is ClientActionSuccessState ){
             showToast(text: 'Action Done Wait TO GET Data', state: ToastState.SUCCESS);
+
+
           }else if(state is ClientGetSellerSuccessState){
             Navigator.of(context).pop(true);
           }else if(state is ClientActionErrorState||state is ClientGetSellerErrorState){
@@ -42,46 +45,92 @@ class ActionScreen extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(horizontal: 15),
-              decoration: BoxDecoration(
-                  border: Border.all(color: ColorManager.lightPrimary),
-                  borderRadius: BorderRadius.circular(15)
+        child: SingleChildScrollView(
+          child: Column(
+
+            children: [
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 15),
+                decoration: BoxDecoration(
+                    border: Border.all(color: ColorManager.lightPrimary),
+                    borderRadius: BorderRadius.circular(15)
+                ),
+                child: DropdownButton(
+          
+                    isExpanded: true,
+                    iconSize: 40,
+          
+                    //  elevation: 0,
+                    dropdownColor: ColorManager.white,
+          
+          
+                    value: cubit.dropValue,
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+          
+                    onChanged: ( String?value){
+          
+                      cubit.dropButtonChange(vlu: value);
+          
+          
+                    },
+          
+                    items:List.generate(cubit.dropValueList.length, (index) =>   DropdownMenuItem<String>(
+          
+                      child: Text(cubit.dropValueList[index],style: TextStyle(color: ColorManager.primary,fontWeight: FontWeight.bold,fontSize: 20),),value: cubit.dropValueList[index],))
+                ),
               ),
-              child: DropdownButton(
+             const SizedBox(height: 20,),
+           defaultButton( onPress: () {
+             showDatePicker(
+               context: context,
+               initialDate: DateTime.now(),
+               firstDate: DateTime(2000),
+               lastDate: DateTime(2101),
+             ).then((selectedDate) {
+               // After selecting the date, display the time picker.
+               if (selectedDate != null) {
+                 showTimePicker(
+                   context: context,
+                   initialTime: TimeOfDay.now(),
+                 ).then((selectedTime) {
+                   // Handle the selected date and time here.
+                   if (selectedTime != null) {
+                     DateTime selectedDateTime = DateTime(
+                       selectedDate.year,
+                       selectedDate.month,
+                       selectedDate.day,
+                       selectedTime.hour,
+                       selectedTime.minute,
+                     );
+                     cubit.alarm=selectedDateTime.toString();
+                     cubit.getEmit();
+                     print(selectedDateTime); // You can use the selectedDateTime as needed.
+                   }
+                 });
+               }
+             });
+           }, name: 'set alarm',height: 50,color: ColorManager.primary),
+             const SizedBox(height: 10,),
+              Visibility(
+                visible: cubit.alarm.isNotEmpty ,
+                child: Row(
+                  children: [
+                  const  Icon(Icons.alarm),
+                    Text(' : ${cubit.alarm}',)
 
-                  isExpanded: true,
-                  iconSize: 40,
-
-                  //  elevation: 0,
-                  dropdownColor: ColorManager.white,
-
-
-                  value: cubit.dropValue,
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-
-                  onChanged: ( String?value){
-
-                    cubit.dropButtonChange(vlu: value);
-
-
-                  },
-
-                  items:List.generate(cubit.dropValueList.length, (index) =>   DropdownMenuItem<String>(
-
-                    child: Text(cubit.dropValueList[index],style: TextStyle(color: ColorManager.primary,fontWeight: FontWeight.bold,fontSize: 20),),value: cubit.dropValueList[index],))
+                  ],
+                ),
               ),
-            ),
-            SizedBox(height: 20,),
-            defaultEditText(label: 'Note',maxLine: 10,textDirection: 'g',control: noteControl),
-            SizedBox(height: 20,),
-        state is ClientActionLoadingState?CircularProgressIndicator() :   defaultButton(color: ColorManager.primary,onPress: (){
-              cubit.updateclientSql(model!.id,cubit.dropValue, noteControl.text,context);
-            }, name: 'submit')
-          ],
+          
+           const   SizedBox(height: 20,),
+              defaultEditText(label: 'Note',maxLine: 10,textDirection: 'g',control: noteControl),
+            const  SizedBox(height: 20,),
+          state is ClientActionLoadingState?CircularProgressIndicator() :   defaultButton(color: ColorManager.primary,onPress: (){
+                cubit.updateclientSql(model!.id,cubit.dropValue, noteControl.text,cubit.date,cubit.alarm,context);
+              }, name: 'submit')
+            ],
+          ),
         ),
       ),
 

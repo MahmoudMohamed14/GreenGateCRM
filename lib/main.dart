@@ -3,25 +3,33 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:greengate/bloc_observer.dart';
 import 'package:greengate/moduls/componant/componant.dart';
+import 'package:greengate/moduls/layoutScreen/layout.dart';
+import 'package:greengate/moduls/login/login_screen.dart';
+import 'package:timezone/data/latest.dart' as tz;
 import 'package:greengate/moduls/componant/local/cache_helper.dart';
 import 'package:greengate/moduls/componant/remote/dioHelper.dart';
+import 'package:greengate/moduls/componant/services/notifi_service.dart';
 import 'package:greengate/moduls/constant/theme_manager.dart';
-import 'package:greengate/moduls/layoutScreen/addClient.dart';
-import 'package:greengate/moduls/layoutScreen/layout.dart';
 import 'package:greengate/moduls/layoutScreen/layout_cubit.dart';
 import 'package:greengate/moduls/layoutScreen/layout_status.dart';
-import 'package:greengate/moduls/login/login_screen.dart';
 
 import 'package:upgrader/upgrader.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 
-//import 'package:telephony/telephony.dart';
-import 'package:url_launcher/url_launcher.dart';
+
+
 
 void main()async  {
   WidgetsFlutterBinding.ensureInitialized();
   await Upgrader.clearSavedSettings();
-  await initialization();
+  //await initialization();
+  NotificationService().initNotification(
+
+  );
+  NotificationService.onNotification.stream.listen((event) {
+    print(event);
+    showToast(text: event+'main', state: ToastState.SUCCESS);
+  });
+  tz.initializeTimeZones();
   DioHelper.init();
   Bloc.observer = MyBlocObserver();
  await CacheHelper.init();
@@ -29,13 +37,13 @@ void main()async  {
   runApp(MyApp(),);
 
 }
-Future initialization() async {
-
-  // print('ready in 3...');
-  await Future.delayed(const Duration(seconds: 1));
-  FlutterNativeSplash.remove();
-
-}
+// Future initialization() async {
+//
+//   // print('ready in 3...');
+//   await Future.delayed(const Duration(seconds: 1));
+//   FlutterNativeSplash.remove();
+//
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -65,10 +73,10 @@ class MyApp extends StatelessWidget {
        },
 
        child: MaterialApp(
-           title: 'Flutter Demo',
+
            debugShowCheckedModeBanner: false,
            theme: getApplicationTheme(context),
-           home:launcherScreen(iscurrentuser: CacheHelper.getData(key: 'isLogin')??false,homeScreen: LayoutScreen(),loginScreen: LoginScreen()) //LayoutScreen()//const MyHomePage(title: 'Flutter Demo Home Page'),
+           home:launcherScreen(iscurrentuser: CacheHelper.getData(key: 'isLogin')??false,homeScreen: LayoutScreen(),loginScreen: LoginScreen()), //LayoutScreen()//const MyHomePage(title: 'Flutter Demo Home Page'),
        ),
      ),
     );

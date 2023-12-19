@@ -33,13 +33,12 @@ class  LayoutScreen extends StatelessWidget {
               return Scaffold(
                   appBar: AppBar(
                     leadingWidth: 100,
-                    leading:CacheHelper.getData(key: 'control') ?
-                  Row(
+                    leading: Row(
                       children: [
-                       if(cubit.indexHomeButton==0) IconButton(onPressed: () async {
-                        await cubit.getAllClient();
+                      IconButton(onPressed: () async {
+                        CacheHelper.getData(key: 'control') ?   await cubit.getAllClient():await cubit.getClientBySeller();
                        },icon:const Icon(Icons.sync),),
-                        IconButton(onPressed: (){
+                       if( CacheHelper.getData(key: 'control') )   IconButton(onPressed: (){
                           showDatePicker(context: context, initialDate: DateTime.now(), firstDate:
                           DateTime.parse('2023-12-01') , lastDate: DateTime.parse('2030-12-31'))
                               .then((value){
@@ -54,7 +53,7 @@ class  LayoutScreen extends StatelessWidget {
                           });
                         },icon:const Icon(Icons.calendar_month),),
                       ],
-                    ):null,
+                    ),
                     centerTitle: true,
                     actions: [
                       // Platform.isWindows? Padding(

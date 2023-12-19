@@ -5,6 +5,8 @@ class ClientModel{
   String ?seller;
   String ? name;
   String ?date;
+  String ?dateCall;
+  String ?dateAlarm;
   //String?depart;
   String ?phone;
   String ?note;
@@ -13,18 +15,15 @@ class ClientModel{
 
 
 
-  ClientModel(
-      {this.name, this.phone, this.seller='', this.note='', this.date, this.state='',
-
-      });
+  ClientModel({this.name, this.phone, this.seller='', this.note='', this.date, this.state='',this.dateCall='',this.dateAlarm=""});
 
   ClientModel.fromJson(Map<String,dynamic>  json){
 
     name=json['name'];
 
     phone=json['phone'];
-    // line=json['line'];
-    //  operator=json['operator'];
+    dateCall=json['dateCall'];
+    dateAlarm=json['dateAlarm'];
     date=json['date'];
     //depart=json['depart'];
     seller=json['seller'];
@@ -42,8 +41,9 @@ class ClientModel{
       "phone":phone,
 
       "name":"$name",
+      "dateAlarm":dateAlarm,
 
-      //"depart":depart,
+      "dateCall":dateCall,
       "date":date,
       "seller":seller,
       'state':state,

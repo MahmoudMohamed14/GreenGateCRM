@@ -11,6 +11,7 @@ import 'package:greengate/models/clientModel.dart';
 import 'package:greengate/moduls/componant/componant.dart';
 import 'package:greengate/moduls/componant/local/cache_helper.dart';
 import 'package:greengate/moduls/componant/remote/dioHelper.dart';
+import 'package:greengate/moduls/componant/services/notifi_service.dart';
 import 'package:greengate/moduls/layoutScreen/layout_status.dart';
 import 'package:greengate/moduls/screens/adminScreen.dart';
 import 'package:greengate/moduls/screens/homeScreen.dart';
@@ -29,6 +30,7 @@ class LayoutCubit extends Cubit< LayoutStates> {
     return BlocProvider.of(context);
   }
   String? filePathClient;
+  String alarm='';
   List<ClientModel> clientListModel=[];
   List<List<dynamic>> clientList= [];
 String date=DateFormat.yMd().format(DateTime.now());
@@ -123,11 +125,11 @@ String date=DateFormat.yMd().format(DateTime.now());
 
   }
   String messageResult='';
-  Future updateclientSql( int? id,String state,String note,context)  async {
+  Future updateclientSql( int? id,String state,String note,dateCall,dateAlarm,context)  async {
   emit(ClientActionLoadingState());
   messageResult='';
     try{
-      Response response=await DioHelper.dio.post('editClient.php',queryParameters: {'id':id,'state':state,'note':note});
+      Response response=await DioHelper.dio.post('editClient.php',queryParameters: {'id':id,'state':state,'note':note,'dateCall':dateCall,"dateAlarm":dateAlarm});
       if(response.statusCode==200){
 
 
@@ -372,17 +374,29 @@ String date=DateFormat.yMd().format(DateTime.now());
             else if(element['state']=='Deal Done') {
               listDealDone.add(ClientModel.fromJson(element));
             }
-            else if(element['state']=='No Answer')
-            {
+            else if(element['state']=='No Answer') {
               listNoAnswer.add(ClientModel.fromJson(element));
-            } else if(element['state']=='Not Interested') {
+            }
+            else if(element['state']=='Not Interested') {
               listNotInterested.add(ClientModel.fromJson(element));
-            } else if(element['state']=='Follow UP') {
+            }
+            else if(element['state']=='Follow UP') {
               listFollowUP.add(ClientModel.fromJson(element));
-            } else if(element['state']=='Follow Meeting') {
+            }
+            else if(element['state']=='Follow Meeting') {
               listFollowMeeting.add(ClientModel.fromJson(element));
-            } else if(element['state'].toString().isEmpty){
+            }
+            else if(element['state'].toString().isEmpty){
               listNotCall.add(ClientModel.fromJson(element));
+            }
+            if(element['dateAlarm'].isNotEmpty && !(DateTime.now().isAfter(DateTime.parse(element['dateAlarm'])))){ NotificationService().scheduleNotification(
+               id: element['id'],
+                title: '${element['name']} (${element['phone']})',
+                body: '${element['note']}',
+                payLoad:'+${element['phone']}' ,
+
+                scheduledNotificationDateTime: DateTime.parse(element['dateAlarm']));
+              print(element['dateAlarm']);
             }
 
             listAllClient.add(ClientModel.fromJson(element));
@@ -444,7 +458,7 @@ void getSeller({String date=''}){
   listNotCall=[];
   listFreshLead=[];
     listAllClient.forEach((element) {
-      if(element.seller==sellerId&&date.isNotEmpty&&date==element.date){
+      if(element.seller==sellerId&&date.isNotEmpty&&date==element.dateCall){
       if(element.state=='Interested') {
         listInterested.add(element);
       }
