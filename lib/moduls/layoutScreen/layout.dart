@@ -2,6 +2,8 @@
 
 
 
+
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:greengate/moduls/componant/componant.dart';
@@ -9,6 +11,7 @@ import 'package:greengate/moduls/componant/local/cache_helper.dart';
 import 'package:greengate/moduls/constant/color_manager.dart';
 import 'package:greengate/moduls/layoutScreen/layout_cubit.dart';
 import 'package:greengate/moduls/layoutScreen/layout_status.dart';
+import 'package:greengate/moduls/screens/searchScreen.dart';
 import 'package:intl/intl.dart';
 
 
@@ -21,7 +24,10 @@ class  LayoutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //TextEditingController? day=new TextEditingController();
+    var keyFormpassword=GlobalKey<FormState>();
+    TextEditingController? codeControl= new TextEditingController();
+    TextEditingController? newPasswordControl=new TextEditingController();
+    TextEditingController? oldPassword=new TextEditingController();
 
     return Builder(
         builder: (context) {
@@ -56,20 +62,167 @@ class  LayoutScreen extends StatelessWidget {
                     ),
                     centerTitle: true,
                     actions: [
+
+                     cubit.indexHomeButton==1&& !CacheHelper.getData(key: 'control') ?  IconButton(onPressed: (){
+                          navigateTo(context, SearchScreen(cubit.listNotCall));
+                          cubit.listOfSearch=[];
+
+                        }, icon: Icon(Icons.search,size: 20,)):SizedBox(),
+
                       // Platform.isWindows? Padding(
                       //   padding: const EdgeInsets.symmetric(horizontal: 10),
                       //   child: IconButton(onPressed: (){
                       //    navigateTo(context, UploadClientScreen());
                       //   }, icon: Icon(Icons.file_upload_outlined)),
                       // ):SizedBox(),
+                      //this is sign out
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(horizontal: 10),
+                      //   child: IconButton(onPressed: (){
+                      //     signOut( context);
+                      //
+                      //     // navigateTo(context, UploadClientScreen());
+                      //   }, icon: Icon(Icons.logout_outlined)),
+                      // )
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: IconButton(onPressed: (){
-                          signOut( context);
+                        child: PopupMenuButton<String>(
+                          color: ColorManager.white,
+                            surfaceTintColor:ColorManager.white ,
 
-                          // navigateTo(context, UploadClientScreen());
-                        }, icon: Icon(Icons.logout_outlined)),
-                      )
+                            itemBuilder: (context)=>[
+                          PopupMenuItem(child: Text('Change Password'),value: 'password',),
+                          PopupMenuItem(child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.login_outlined,color: Colors.red,),
+                              SizedBox(width: 20,),
+                              Text('Sign Out',style: TextStyle(color: Colors.red),),
+                            ],
+                          ),value: 'out',),
+
+
+                        ],
+                            onSelected: (String value){
+                              if(value=='password'){
+                                showDialog(
+
+
+                                    barrierDismissible: false,
+                                    context: context, builder:(context )=>AlertDialog(
+                                  backgroundColor: Colors.white,
+
+
+                                  title: Text('Change Password'),
+                                  content: Form(
+                                    key: keyFormpassword,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        defaultEditText(
+                                            control:codeControl,
+                                            validat: ( s){
+                                              bool isTrue=false;
+
+                                              if(s!.isEmpty){
+                                                return" code is empty";
+                                              }if(CacheHelper.getData(key: 'myId')!= codeControl.text) isTrue=true;
+                                              if(isTrue)  return "Code Not True!!!";
+
+                                              return null;
+                                            },
+                                            label: "code",
+                                            prefIcon: Icons.text_fields,
+                                            textType: TextInputType.number
+                                        ),
+                                        SizedBox(height: 20,),
+                                        defaultEditText(
+                                          control: oldPassword,
+
+
+                                          textType:TextInputType.visiblePassword,
+
+
+
+
+                                          validat: ( s){
+                                            bool isTrue=false;
+
+                                            if(s!.isEmpty){
+                                              return"Empty";
+                                            }if(CacheHelper.getData(key: 'password')!= oldPassword.text) isTrue=true;
+                                            if(isTrue)  return "Old Password Not True!!!";
+
+                                            return null;
+                                          },
+                                          label: "Old Password",
+                                          prefIcon: Icons.password,
+
+                                        ),
+                                        SizedBox(height: 20,),
+                                        defaultEditText(
+                                          control: newPasswordControl,
+
+
+                                          textType:TextInputType.visiblePassword,
+
+
+
+
+                                          validat: ( s){
+                                            if(s!.isEmpty){
+                                              return"Empty";
+                                            }
+                                            return null;
+                                          },
+                                          label: "New Password",
+                                          prefIcon: Icons.password,
+
+                                        ),
+                                      ],
+
+
+                                    ),
+                                  ),
+                                  actions: [
+                                    TextButton(onPressed: (){
+                                      Navigator.pop(context);
+                                      newPasswordControl.clear();
+                                      codeControl.clear();
+                                      oldPassword.clear();
+                                    }, child: Text('Cancel',style: TextStyle(color: Colors.red),)),
+                                    TextButton(onPressed: (){
+                                      print(CacheHelper.getData(key: 'password'));
+                                      if(keyFormpassword.currentState!.validate()){
+                                       cubit.changePasswordSql(codeControl.text.trim(),newPasswordControl.text.trim(),context);
+
+                                        // cubit.changePassword(
+                                        //     code: codeControl.text,
+                                        //     newPassword: newPasswordControl.text,
+                                        //     context: context
+                                        // );
+                                        newPasswordControl.clear();
+                                        oldPassword.clear();
+                                        codeControl.clear();
+                                      }
+
+
+                                    }, child: Text('change')),
+
+                                  ],
+
+                                ));
+                                print('password done');
+                              } else if(value=='out'){
+                                signOut( context);
+                              }
+                            },
+
+
+                            shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(20),side: BorderSide(color: ColorManager.primary))
+                        ),
+                      ),
+
                     ],
 
                     title: Text("GREEN GATE",
@@ -86,11 +239,7 @@ class  LayoutScreen extends StatelessWidget {
 
 
 
-                items: CacheHelper.getData(key: 'control')? const <BottomNavigationBarItem>[
-                  BottomNavigationBarItem(icon: Icon(Icons.menu,),label: 'Menu'),
-                  BottomNavigationBarItem(icon: Icon(Icons.home_filled),label: 'home'),
-
-                ]:const <BottomNavigationBarItem>[
+                items:const <BottomNavigationBarItem>[
                     BottomNavigationBarItem(icon: Icon(Icons.menu,),label: 'Menu'),
                     BottomNavigationBarItem(icon: Icon(Icons.home_filled),label: 'home'),
                   BottomNavigationBarItem(icon: Icon(Icons.add),label: 'Add Client'),

@@ -34,7 +34,9 @@ class LayoutCubit extends Cubit< LayoutStates> {
   List<ClientModel> clientListModel=[];
   List<List<dynamic>> clientList= [];
 String date=DateFormat.yMd().format(DateTime.now());
-  pickFileReview() async {
+  bool isFreshLead = false;
+  pickFileReview({bool isLead = false}) async {
+    isFreshLead=isLead;
 
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
@@ -60,8 +62,9 @@ String date=DateFormat.yMd().format(DateTime.now());
         clientListModel.add(ClientModel(
 
           name: fields[i][0].toString().trim(),
-         phone: fields[i][1].toString().trim(),
-         seller: fields[i][2].toString().trim(),
+          phone: fields[i][1].toString().trim(),
+          seller: fields[i][2].toString().trim(),
+           state: isLead?fields[i][3].toString().trim():'',
          date:date
 
 
@@ -253,6 +256,18 @@ String date=DateFormat.yMd().format(DateTime.now());
   //List<String>listGrid=['Not Call','No Answer Potential','Cold Call','No Answer','Not Interested','Follow UP','Follow Meeting'];
  List<String>listSeller=[];
   Future<void> getAllClient() async {
+    sellerId='';
+    listSeller=[];
+    listAllClient=[];
+    listInterested=[];
+    listClosedCall=[];
+    listNoAnswer=[];
+    listNotInterested=[];
+    listFollowUP=[];
+    listDealDone=[];
+    listFollowMeeting=[];
+    listNotCall=[];
+    listFreshLead=[];
     emit(ClientGetLoadingState());
 
     try{
@@ -262,18 +277,7 @@ String date=DateFormat.yMd().format(DateTime.now());
         //  showToast(text: value.data.toString(), state: ToastState.SUCCESS);
         if(res.length>0){
 
-          sellerId='';
-          listSeller=[];
-          listAllClient=[];
-          listInterested=[];
-          listClosedCall=[];
-          listNoAnswer=[];
-          listNotInterested=[];
-          listFollowUP=[];
-          listDealDone=[];
-          listFollowMeeting=[];
-          listNotCall=[];
-          listFreshLead=[];
+
           print(res);
 
           res.forEach((element){
@@ -338,6 +342,16 @@ String date=DateFormat.yMd().format(DateTime.now());
 
   }
   Future<void> getClientBySeller() async {
+    listAllClient=[];
+    listInterested=[];
+    listClosedCall=[];
+    listNoAnswer=[];
+    listNotInterested=[];
+    listFollowUP=[];
+    listDealDone=[];
+    listFollowMeeting=[];
+    listNotCall=[];
+    listFreshLead=[];
     emit(ClientGetSellerLoadingState());
     messageResult='';
     try{
@@ -348,16 +362,7 @@ String date=DateFormat.yMd().format(DateTime.now());
         //  showToast(text: value.data.toString(), state: ToastState.SUCCESS);
         if(res.length>0){
 
-          listAllClient=[];
-          listInterested=[];
-          listClosedCall=[];
-          listNoAnswer=[];
-          listNotInterested=[];
-          listFollowUP=[];
-          listDealDone=[];
-          listFollowMeeting=[];
-          listNotCall=[];
-          listFreshLead=[];
+
         //  print(res);
 
           res.forEach((element){
@@ -426,7 +431,7 @@ String date=DateFormat.yMd().format(DateTime.now());
 
   }
   List<Widget>listScreen=[HomeScreen(),NotCallScreen(),InsertClientScreen()];
-  List<Widget>listAdminScreen=[HomeScreen(),MonitorScreen()];
+  List<Widget>listAdminScreen=[HomeScreen(),MonitorScreen(),InsertClientScreen()];
 
   Future makeCall(String phone) async {
     Uri uri=Uri(scheme: 'tel', path: '${phone}');
@@ -440,6 +445,8 @@ void  indexOfListSelect(index){
 }
   String dropValue='No Answer';
   List<String>dropValueList=['Interested','Closed','No Answer','Not Interested','Follow UP','Follow Meeting','Deal Done'];
+
+  List<String>dropValueListFresh=['Interested','Closed','No Answer','Not Interested','Follow UP','Follow Meeting','Deal Done','Fresh Leads'];
   void dropButtonChange({vlu}) {
     dropValue = vlu;
     emit(HiringDropState ());
@@ -515,9 +522,10 @@ void getSeller({String date=''}){
     });
     getEmit();
 }
+List<ClientModel>listOfSearch=[];
 Future<void> whatsApp(num) async {
     Uri uri1= Uri.parse('whatsapp://send?phone=$num&&text=');
-    Uri uri2= Uri.parse("wa.me/$num?text=${Uri.parse('')}");
+    Uri uri2= Uri.parse("https://wa.me/$num?text=${Uri.parse('')}");
  // Uri uri1= Uri.parse('https://api.whatsapp.com/send?phone=$num&&text=');
 //  Uri uri2= Uri.parse("https://wa.me/$num/?text=${Uri.parse('')}");
     if (await canLaunchUrl(uri1)) {
@@ -529,6 +537,61 @@ Future<void> whatsApp(num) async {
       showToast(text: 'NO WhatsApp install in this dvice ', state: ToastState.ERROR);
     }
 }
+  void search(String value,List<ClientModel> list){
+    listOfSearch=[];
+    listOfSearch = list.where((element) => element.phone!.toLowerCase().trim().contains(value.toLowerCase())).toList();
+    // else  listOfSearch = Share.listofmapFMM.where((element) => element['code']!.toLowerCase().trim().contains(value.toLowerCase())).toList();
 
+     emit(SearchState());
+  }
+  Future registerSql(code,name,password) async {
+  emit(RegisterSQLLoadingState());
+    try{
+      Response response=await DioHelper.dio.post('register.php',queryParameters: {
+        'name': name,
+        'code': code,
+        'depart': 'Green Gate',
+        'password':password,
+        'controller': 'false',
+        'normal':'0',
+        'sudden':'0',
+        'location':''
+      });
+      if(response.statusCode==200){
+       // loginSql(code, password);
+        // print(i);
+        //  valuepross=(i+1)/paySlipList.length*100;
+        //getEmit();
+        print("###############################");
+        emit(RegisterSQLSuccessState());
+      }
+    }catch(error){
+      print("payupload "+error.toString());
+
+    }
+
+  }
+  Future changePasswordSql(String username, String password,context) async {
+
+    try{
+      Response response=await  DioHelper.dio.post('updatepassword.php',queryParameters:{'code': username, 'password': password,} );
+      if (response.statusCode == 200 && response.data.trim().contains("success" )) {
+
+
+        await CacheHelper.putData(key: 'password', value: password);
+        Navigator.pop(context);
+        emit(ChangePasswordSuccessState());
+        // print(value.headers);
+        print(response.data.trim()); // The response from PHP script
+      } else {
+        showToast(text: 'code error', state: ToastState.ERROR);
+        print('Login failed: ${response.data.trim()}');
+
+      }}catch(error){
+      print(error.toString());
+      showToast(text: error.toString(), state: ToastState.ERROR);
+    }
+
+  }
 
 }

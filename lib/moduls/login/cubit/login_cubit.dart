@@ -24,6 +24,8 @@ class LoginCubit extends Cubit<LoginState> {
     emit(LoginPasswordState());
 
   }
+
+
   Future loginSql(String username, String password,{bool notLogin=false})  async {
     if(username.isNotEmpty&password.isNotEmpty) {
    emit(LoginLoadingState());
@@ -36,6 +38,7 @@ class LoginCubit extends Cubit<LoginState> {
           if (res.length > 0) {
             CacheHelper.putData(key: 'isLogin', value: true);
             CacheHelper.putData(key: 'myId', value: res[0]['code']);
+            CacheHelper.putData(key: 'password', value: res[0]['password']);
             if (res[0]['controller'] == 'true') {
               CacheHelper.putData(key: 'control', value: true);}else{
               CacheHelper.putData(key: 'control', value: false);

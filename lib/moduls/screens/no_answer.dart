@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:greengate/moduls/componant/componant.dart';
 import 'package:greengate/moduls/constant/color_manager.dart';
 import 'package:greengate/moduls/layoutScreen/design.dart';
 import 'package:greengate/moduls/layoutScreen/layout_cubit.dart';
 import 'package:greengate/moduls/layoutScreen/layout_status.dart';
+
+import 'searchScreen.dart';
 class  NotAnswerScreen extends StatelessWidget {
 
 
@@ -25,6 +28,13 @@ class  NotAnswerScreen extends StatelessWidget {
               return Scaffold(
                   appBar: AppBar(
                     centerTitle: true,
+                    actions: [
+                      IconButton(onPressed: (){
+                        navigateTo(context, SearchScreen(cubit.listNoAnswer));
+                        cubit.listOfSearch=[];
+
+                      }, icon: Icon(Icons.search,size: 20,))
+                    ],
 
                     title: Text("NOT Answer",
                         style: TextStyle(color:ColorManager.darkPrimary,

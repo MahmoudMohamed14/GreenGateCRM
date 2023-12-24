@@ -18,7 +18,7 @@ class ChangeHomeButton extends  LayoutStates{}
 class ClientActionLoadingState extends  LayoutStates{}
 class ClientActionErrorState extends  LayoutStates{}
 class ClientActionSuccessState extends  LayoutStates{}
-// class PermissionDeleteSuccessState extends  LayoutStates{}
-// class PermissionUpdateLoadingState extends  LayoutStates{}
-// class PermissionUpdateErrorState extends  LayoutStates{}
-// class PermissionUpdateSuccessState extends  LayoutStates{}
+class SearchState extends  LayoutStates{}
+class RegisterSQLSuccessState extends  LayoutStates{}
+ class RegisterSQLLoadingState extends  LayoutStates{}
+ class ChangePasswordSuccessState extends  LayoutStates{}

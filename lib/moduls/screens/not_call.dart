@@ -17,7 +17,7 @@ class  NotCallScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //TextEditingController? day=new TextEditingController();
+ TextEditingController? searchControl=new TextEditingController();
 
     return Builder(
         builder: (context) {
@@ -55,64 +55,5 @@ class  NotCallScreen extends StatelessWidget {
   }
 
 
-  Widget newClentModel(ClientModel model,context,index){
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding:  const EdgeInsets.all(10),
-
-          decoration: BoxDecoration(
-              border: Border.all(color: ColorManager.primary,),
-
-
-              borderRadius: BorderRadius.circular(10),
-              color:LayoutCubit.get(context).indexSelect ==index?ColorManager.grey:Colors.white
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                //mainAxisSize: MainAxisSize.min,
-
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisSize:MainAxisSize.min ,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('${model.name}',style: TextStyle(fontWeight:FontWeight.bold,color:LayoutCubit.get(context).indexSelect ==index?ColorManager.white:ColorManager.primary),),
-                        const SizedBox(height: 10,),
-                        Text('${model.phone}',style: TextStyle(color: LayoutCubit.get(context).indexSelect ==index?ColorManager.white:Colors.grey,),),
-                      ],),
-                  ),
-                  const Spacer(),
-
-                GestureDetector(onTap: () async {
-                   await LayoutCubit.get(context).whatsApp(model.phone);
-
-                },child: const   CircleAvatar(child: Image(image:AssetImage('assets/whats.png'),fit: BoxFit.fill),radius: 12,)),
-                const SizedBox(width: 10,),
-                 IconButton(onPressed: (){
-
-                    LayoutCubit.get(context).indexOfListSelect(index);
-                    LayoutCubit.get(context).makeCall('+${model.phone}').then((value) {
-                      navigateTo(context, ActionScreen(model));
-
-                    });
-
-                  }, icon: Icon(Icons.phone,color:  ColorManager.primary,))
-                ],
-              ),
-              SizedBox(height: 20,),
-              Text('${model.note} ',textDirection: TextDirection.rtl,style:  TextStyle(color: LayoutCubit.get(context).indexSelect ==index?ColorManager.white:Colors.grey,))
-            ],
-          ),
-        ),
-        const SizedBox(height: 20,)
-      ],
-    );
-  }
 
 }

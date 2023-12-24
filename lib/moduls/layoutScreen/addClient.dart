@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:greengate/moduls/componant/componant.dart';
 import 'package:greengate/moduls/constant/color_manager.dart';
 import 'package:greengate/moduls/layoutScreen/layout_cubit.dart';
 import 'package:greengate/moduls/layoutScreen/layout_status.dart';
@@ -30,84 +31,86 @@ class  UploadClientScreen extends StatelessWidget {
                         style: TextStyle(color:ColorManager.darkPrimary,
                           fontSize: 20.0,)
                     ),
-                    actions:[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: IconButton(onPressed: (){
-                          cubit.updateValueSql('name',value: "test",id: 2);
-                         cubit.pickFileReview();
-                        }, icon: Icon(Icons.file_upload_outlined)),
-                      )
-                    ],
+                    // actions:[
+                    //   Padding(
+                    //     padding: const EdgeInsets.symmetric(horizontal: 10),
+                    //     child: IconButton(onPressed: (){
+                    //       //cubit.updateValueSql('name',value: "test",id: 2);
+                    //    //  cubit.pickFileReview();
+                    //     }, icon: Icon(Icons.file_upload_outlined)),
+                    //   )
+                    // ],
                   ),
-                  body:  cubit.clientList.isNotEmpty?RefreshIndicator(
-                    onRefresh:  () async{
-                      RefreshProgressIndicator();
-                    },
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          children: [
+                  body:  cubit.clientList.isNotEmpty?Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      children: [
 
 
-                            ListView.builder(
+                        Expanded(
 
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount: cubit.clientList.length,
-                              scrollDirection: Axis.vertical,
-                              shrinkWrap: true,
-                              itemBuilder: (context, index) {
-                                return Column(
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(child: Center(child: Text("${cubit.clientList[index][0]}"))),
-
-
-                                        Expanded(child: Text("${cubit.clientList[index][1]}")),
-
-                                       // Expanded(child: Center(child: Text("${cubit.clientList[index][2]}"))),
-
-
-                                      ],
-                                    ),
-                                    const  SizedBox(height: 10,),
-                                  ],
-                                );
-
-                              },
-
-                            ),
-                            const  SizedBox(height: 20,),
-                            cubit.clientList.isNotEmpty ? Column(
-                              children: [
-
-
-                                const SizedBox(height: 20,),
-
-
-
-
-                                ElevatedButton(
-                                  child:  Text("Upload"),
-                                  onPressed:(){
-
-                                   cubit.insertClienSql();
-
-
-
-
-                                  },
-                                ),
-
-                              ],
-                            ): const SizedBox(),
-                          ],
+                          child: ListView.builder(
+                          
+                            physics: ClampingScrollPhysics(),
+                            itemCount: cubit.clientList.length,
+                            scrollDirection: Axis.vertical,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              return Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(child: Center(child: Text("${cubit.clientList[index][0]}"))),
+                          
+                          
+                                      Expanded(child: Text("${cubit.clientList[index][1]}")),
+                          
+                                     Expanded(child: Center(child: Text("${cubit.clientList[index][2]}"))),
+                          
+                                     cubit.isFreshLead? Expanded(child: Center(child: Text("${cubit.clientList[index][3]}"))):SizedBox(),
+                          
+                                    ],
+                                  ),
+                                  const  SizedBox(height: 10,),
+                                ],
+                              );
+                          
+                            },
+                          
+                          ),
                         ),
-                      ),
+                        const  SizedBox(height: 20,),
+                        cubit.clientList.isNotEmpty ? ElevatedButton(
+
+                          child:  Text("Upload",style: TextStyle(color: ColorManager.white),),
+                          onPressed:(){
+
+                           cubit.insertClienSql();
+
+
+
+
+                          },
+                        ): const SizedBox(),
+                      ],
                     ),
-                  ):SizedBox()
+                  ):
+                  Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                      defaultButton(color: ColorManager.primary,onPress: (){
+                        cubit.pickFileReview();
+                      }, name: 'Fetch File Normal Client '),
+                      SizedBox(height: 20,),
+                      defaultButton(color:ColorManager.primary,onPress: (){
+                        cubit.pickFileReview(isLead: true);
+                      }, name: 'Fetch File Fresh Leads '),
+
+                    ],),
+                  )
               );
             } ,
 

@@ -75,9 +75,9 @@ class ActionScreen extends StatelessWidget {
           
                     },
           
-                    items:List.generate(cubit.dropValueList.length, (index) =>   DropdownMenuItem<String>(
+                    items:List.generate(model!.state=='Fresh Leads'?cubit.dropValueListFresh.length:cubit.dropValueList.length, (index) =>   DropdownMenuItem<String>(
           
-                      child: Text(cubit.dropValueList[index],style: TextStyle(color: ColorManager.primary,fontWeight: FontWeight.bold,fontSize: 20),),value: cubit.dropValueList[index],))
+                      child: Text(model!.state=='Fresh Leads'?cubit.dropValueListFresh[index]:cubit.dropValueList[index],style: TextStyle(color: ColorManager.primary,fontWeight: FontWeight.bold,fontSize: 20),),value:model!.state=='Fresh Leads'?cubit.dropValueListFresh[index] :cubit.dropValueList[index],))
                 ),
               ),
              const SizedBox(height: 20,),
