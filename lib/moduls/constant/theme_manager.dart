@@ -33,6 +33,7 @@ ThemeData getApplicationTheme(context) {
              outlineBorder: BorderSide(color: ColorManager.primary)
         )
       ),
+
     cardTheme: CardTheme(
       elevation: AppSize.s4,
       color: ColorManager.white,
@@ -57,11 +58,22 @@ ThemeData getApplicationTheme(context) {
           statusBarBrightness: Brightness.light,
               statusBarColor: ColorManager.white,
           statusBarIconBrightness: Brightness.dark
-        )
+        ),
 
-
+      foregroundColor:  ColorManager.white,
+      surfaceTintColor: ColorManager.white,
 
     ),
+      popupMenuTheme: PopupMenuThemeData(
+          color: Colors.white,
+          shadowColor: ColorManager.primary,
+          surfaceTintColor: Colors.white,
+          shape: Border.all(color:ColorManager.primary, )
+        // Set background color for PopupMenuButton
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: ColorManager.white,
+      ),
 
     // button theme
     buttonTheme: ButtonThemeData(
@@ -102,9 +114,7 @@ ThemeData getApplicationTheme(context) {
         hintStyle:getRegularStyle(color: ColorManager.grey, fontSize: FontSize.s14),
         labelStyle:getMediumStyle(color: ColorManager.grey, fontSize: FontSize.s14),
         errorStyle: getRegularStyle(color: ColorManager.error),),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: Colors.white
-      )
+
 
         // enabled border style
         // enabledBorder: OutlineInputBorder(

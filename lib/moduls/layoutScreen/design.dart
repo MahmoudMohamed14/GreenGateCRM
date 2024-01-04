@@ -10,7 +10,7 @@ import 'package:greengate/moduls/screens/closed_screen.dart';
 import 'package:greengate/moduls/screens/follow_meeting.dart';
 import 'package:greengate/moduls/screens/follow_up.dart';
 import 'package:greengate/moduls/screens/no_answer.dart';
-import 'package:greengate/moduls/screens/interested_screen.dart';
+import 'package:greengate/moduls/screens/false_nubmer_screen.dart';
 import 'package:greengate/moduls/screens/not_call.dart';
 import 'package:greengate/moduls/screens/not_interested.dart';
 class Design{
@@ -117,34 +117,98 @@ class Design{
    );
  }
 
- static Widget sellerDesign(context,text){
+ static Widget sellerDesign(context,Map<String,dynamic>map){
+   var keyFormpassword=GlobalKey<FormState>();
+   TextEditingController? nameControl= new TextEditingController();
    return  GestureDetector(
      onTap: (){
-       LayoutCubit.get(context).sellerId=text;
+       LayoutCubit.get(context).sellerId=map['code'];
        LayoutCubit.get(context).getSeller();
        LayoutCubit.get(context).changeHomeButton(0);
      },
-     child: Column(
-      // mainAxisSize: MainAxisSize.min,
-       crossAxisAlignment: CrossAxisAlignment.center,
-       children: [
-         Center(
-           child: Container(
-             width: double.infinity,
-             padding:  const EdgeInsets.all(10),
+     child: Container(
+       width: double.infinity,
+       padding:  const EdgeInsets.all(10),
 
-             decoration: BoxDecoration(
-                 border: Border.all(color: ColorManager.primary,),
+       decoration: BoxDecoration(
+           border: Border.all(color: ColorManager.primary,),
 
 
-                 borderRadius: BorderRadius.circular(10),
-                 color:Colors.white
-             ),
-             child: Center(child: Text('${text}',style: getBoldStyle(color: ColorManager.primary,fontSize: 20,))),
+           borderRadius: BorderRadius.circular(10),
+           color:Colors.white
+       ),
+       child: Row(
+        // mainAxisSize: MainAxisSize.min,
+        // crossAxisAlignment: CrossAxisAlignment.center,
+         children: [
+           Expanded(
+
+             child: Text('${map['name']} ${map['code']}  ',style: getBoldStyle(color: ColorManager.primary,fontSize: 20,)),
            ),
-         ),
-         SizedBox(height: 20,)
-       ],
+           Spacer(),
+           IconButton(onPressed: (){
+             showDialog(
+
+
+
+
+                 barrierDismissible: false,
+                 context: context, builder:(context )=>AlertDialog(
+               backgroundColor: Colors.white,
+
+
+               title: Text('Change User Name'),
+               content: Form(
+                 key: keyFormpassword,
+                 child: Column(
+                   mainAxisSize: MainAxisSize.min,
+                   children: [
+                     defaultEditText(
+                         control:nameControl,
+                         validat: ( s){
+                         //  bool isTrue=false;
+
+                           if(s!.isEmpty){
+                             return" Name is empty";
+                           }
+                           return null;
+                         },
+                         label: "New Name",
+                         prefIcon: Icons.text_fields,
+                         textType: TextInputType.number
+                     ),
+
+
+                   ],
+
+
+                 ),
+               ),
+               actions: [
+                 TextButton(onPressed: (){
+                   Navigator.pop(context);
+                   nameControl.clear();
+
+                 }, child: Text('Cancel',style: TextStyle(color: Colors.red),)),
+                 TextButton(onPressed: (){
+                   //print(CacheHelper.getData(key: 'password'));
+                   if(keyFormpassword.currentState!.validate()){
+                    LayoutCubit.get(context).updateUserSql(map['code'], nameControl.text, context);
+                    nameControl.clear();
+
+
+                   }
+
+
+                 }, child: Text('change')),
+
+               ],
+
+             ));
+           }, icon: Icon(Icons.edit))
+
+         ],
+       ),
      ),
    );
  }

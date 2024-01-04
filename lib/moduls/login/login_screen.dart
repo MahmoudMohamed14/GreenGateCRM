@@ -36,6 +36,7 @@ class LoginScreen extends StatelessWidget {
               navigateAndFinish(context, LayoutScreen());
               if(CacheHelper.getData(key: 'control')) {
                 LayoutCubit.get(context).getAllClient();
+                LayoutCubit.get(context).getSellerByDepartSql();
               } else {
                 LayoutCubit.get(context).getClientBySeller();
               }
@@ -75,8 +76,10 @@ class LoginScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 20,),
-                          Text('Welcome Green Gate',style: TextStyle(color: ColorManager.primary,fontWeight: FontWeight.w900,fontSize: 25),),
-                        const   SizedBox(height: 30,),
+                          Text('GREEN GATE',style: TextStyle(color: ColorManager.primary,fontWeight: FontWeight.w900,fontSize: 25),),
+                          Text('Real Estate',style: TextStyle(color: ColorManager.primary,fontWeight: FontWeight.w900,fontSize: 18),),
+
+                          const   SizedBox(height: 30,),
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.white,

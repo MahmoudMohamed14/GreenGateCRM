@@ -22,3 +22,10 @@ class SearchState extends  LayoutStates{}
 class RegisterSQLSuccessState extends  LayoutStates{}
  class RegisterSQLLoadingState extends  LayoutStates{}
  class ChangePasswordSuccessState extends  LayoutStates{}
+class GetSellerDepartLoadingState extends  LayoutStates{}
+class GetSellerDepartErrorState extends  LayoutStates{
+ String?error;
+ GetSellerDepartErrorState({this.error});
+}
+class GetSellerDepartSuccessState extends  LayoutStates{}
+class UpdateUseSuccessState extends  LayoutStates{}

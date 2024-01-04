@@ -22,7 +22,13 @@ class InsertClientScreen extends StatelessWidget {
 
     var keyForm=GlobalKey<FormState>();
     return  BlocConsumer<LayoutCubit,LayoutStates>(
-        listener: (context,state){},
+        listener: (context,state){
+          if(state is AddClientSuccessState){
+            showToast(text: 'Add Successfully', state: ToastState.SUCCESS);
+            LayoutCubit.get(context).indexHomeButton=1;
+
+          }
+        },
     builder: (context,state){
           var cubit=  LayoutCubit.get(context);
           return  CacheHelper.getData(key: 'control')? Padding(

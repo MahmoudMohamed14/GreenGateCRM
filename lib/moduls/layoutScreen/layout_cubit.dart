@@ -181,7 +181,7 @@ String date=DateFormat.yMd().format(DateTime.now());
         if(response.statusCode==200){
          // print(i);
         //  valuepross=(i+1)/clientList.length*100;
-          getEmit();
+         // getEmit();
           print("###############################");
           print(response.data);
 
@@ -243,7 +243,7 @@ String date=DateFormat.yMd().format(DateTime.now());
   }
 
   List<ClientModel>listAllClient=[];
-  List<ClientModel>listInterested=[];
+  List<ClientModel>listNumberFalse=[];
   List<ClientModel>listClosedCall=[];
   List<ClientModel>listNoAnswer=[];
   List<ClientModel>listNotInterested=[];
@@ -257,9 +257,10 @@ String date=DateFormat.yMd().format(DateTime.now());
  List<String>listSeller=[];
   Future<void> getAllClient() async {
     sellerId='';
+    messageResult='';
     listSeller=[];
     listAllClient=[];
-    listInterested=[];
+    listNumberFalse=[];
     listClosedCall=[];
     listNoAnswer=[];
     listNotInterested=[];
@@ -278,21 +279,19 @@ String date=DateFormat.yMd().format(DateTime.now());
         if(res.length>0){
 
 
-          print(res);
+         // print(res);
 
           res.forEach((element){
-            if(element['state']=='Interested') {
-
-              listInterested.add(ClientModel.fromJson(element));
-            }
-            else if(element['state']=='Closed') {
+             if(element['state']=='Closed') {
 
               listClosedCall.add(ClientModel.fromJson(element));
             }
-            else if(element['state']=='Deal Done') {
+            else if(element['state']=='Done Deal') {
 
               listDealDone.add(ClientModel.fromJson(element));
-            }
+            } else if(element['state']=='False Number') {
+               listNumberFalse.add(ClientModel.fromJson(element));
+             }
             else if(element['state']=='No Answer') {
 
               listNoAnswer.add(ClientModel.fromJson(element));
@@ -332,10 +331,13 @@ String date=DateFormat.yMd().format(DateTime.now());
 
         print(response.statusCode);
 
-      } else {print('Get All Data Error: ${response.data}');}
+      } else {
+        print('Get All Data Error: ${response.data}');
+        messageResult=response.data.toString();
+      }
     }catch(onError){
      emit(ClientGetErrorState());
-
+     messageResult=onError.toString();
       print('Get All Data Error: ${onError.toString()}');
       print(onError);
     }
@@ -343,7 +345,7 @@ String date=DateFormat.yMd().format(DateTime.now());
   }
   Future<void> getClientBySeller() async {
     listAllClient=[];
-    listInterested=[];
+    listNumberFalse=[];
     listClosedCall=[];
     listNoAnswer=[];
     listNotInterested=[];
@@ -366,17 +368,16 @@ String date=DateFormat.yMd().format(DateTime.now());
         //  print(res);
 
           res.forEach((element){
-            if(element['state']=='Interested') {
-              listInterested.add(ClientModel.fromJson(element));
-            }
-            else if(element['state']=='Fresh Leads') {
+             if(element['state']=='Fresh Leads') {
 
               listFreshLead.add(ClientModel.fromJson(element));
-            }
+            } else if(element['state']=='False Number') {
+               listNumberFalse.add(ClientModel.fromJson(element));
+             }
             else if(element['state']=='Closed') {
               listClosedCall.add(ClientModel.fromJson(element));
             }
-            else if(element['state']=='Deal Done') {
+            else if(element['state']=='Done Deal') {
               listDealDone.add(ClientModel.fromJson(element));
             }
             else if(element['state']=='No Answer') {
@@ -444,18 +445,18 @@ void  indexOfListSelect(index){
 
 }
   String dropValue='No Answer';
-  List<String>dropValueList=['Interested','Closed','No Answer','Not Interested','Follow UP','Follow Meeting','Deal Done'];
+  List<String>dropValueList=['Closed','False Number','No Answer','Not Interested','Follow UP','Follow Meeting','Done Deal'];
 
-  List<String>dropValueListFresh=['Interested','Closed','No Answer','Not Interested','Follow UP','Follow Meeting','Deal Done','Fresh Leads'];
+  List<String>dropValueListFresh=['Closed','False Number','No Answer','Not Interested','Follow UP','Follow Meeting','Done Deal','Fresh Leads'];
   void dropButtonChange({vlu}) {
     dropValue = vlu;
     emit(HiringDropState ());
   }
   String sellerId='';
   int getlengthofCalled(){
-    return listClosedCall.length+listDealDone.length+listInterested.length+listNoAnswer.length+listNotInterested.length+ listFollowUP.length+listFollowMeeting.length;  }
+    return listClosedCall.length+listDealDone.length+listNumberFalse.length+listNoAnswer.length+listNotInterested.length+ listFollowUP.length+listFollowMeeting.length;  }
 void getSeller({String date=''}){
-  listInterested=[];
+listNumberFalse=[];
   listClosedCall=[];
   listNoAnswer=[];
   listNotInterested=[];
@@ -466,16 +467,16 @@ void getSeller({String date=''}){
   listFreshLead=[];
     listAllClient.forEach((element) {
       if(element.seller==sellerId&&date.isNotEmpty&&date==element.dateCall){
-      if(element.state=='Interested') {
-        listInterested.add(element);
-      }
-      else if(element.state=='Closed') {
+       if(element.state=='Closed') {
         listClosedCall.add(element);
       }
-      else if(element.state=='Fresh Leads') {
-        listFreshLead.add(element);
+       else if(element.state=='Fresh Leads') {
+         listFreshLead.add(element);
+       }
+      else if(element.state=='False Number') {
+        listNumberFalse.add(element);
       }
-      else if(element.state=='Deal Done') {
+      else if(element.state==' Done Deal') {
         listDealDone.add(element);
       }
       else if(element.state=='No Answer') {
@@ -490,19 +491,18 @@ void getSeller({String date=''}){
       else if(element.state=='Follow Meeting') {
         listFollowMeeting.add(element);
       }
-      else if(element.state!.isEmpty) {
-        listNotCall.add(element);
-      }}
+     }
       else if(element.seller==sellerId&&date.isEmpty){
-        if(element.state=='Interested') {
-          listInterested.add(element);
-        }
-        else if(element.state=='Closed') {
+
+         if(element.state=='Closed') {
           listClosedCall.add(element);
         }
-        else if(element.state=='Deal Done') {
+        else if(element.state=='Done Deal') {
           listDealDone.add(element);
         }
+         else if(element.state=='False Number') {
+           listNumberFalse.add(element);
+         }
         else if(element.state=='No Answer') {
           listNoAnswer.add(element);
         }
@@ -515,9 +515,12 @@ void getSeller({String date=''}){
         else if(element.state=='Follow Meeting') {
           listFollowMeeting.add(element);
         }
-        else if(element.state!.isEmpty) {
-          listNotCall.add(element);
-        }}
+        }
+      if(element.seller==sellerId){
+      if(element.state!.isEmpty) {
+        listNotCall.add(element);
+      }
+      }
 
     });
     getEmit();
@@ -550,7 +553,7 @@ Future<void> whatsApp(num) async {
       Response response=await DioHelper.dio.post('register.php',queryParameters: {
         'name': name,
         'code': code,
-        'depart': 'Green Gate',
+        'depart': 'GreenGate',
         'password':password,
         'controller': 'false',
         'normal':'0',
@@ -558,6 +561,7 @@ Future<void> whatsApp(num) async {
         'location':''
       });
       if(response.statusCode==200){
+        await getSellerByDepartSql();
        // loginSql(code, password);
         // print(i);
         //  valuepross=(i+1)/paySlipList.length*100;
@@ -591,6 +595,65 @@ Future<void> whatsApp(num) async {
       print(error.toString());
       showToast(text: error.toString(), state: ToastState.ERROR);
     }
+
+  }
+  Future updateUserSql(String code, String name,context) async {
+
+    try{
+      Response response=await  DioHelper.dio.post('updateUser.php',queryParameters:{'code': code, 'name':name,} );
+      if (response.statusCode == 200 && response.data.trim().contains("success" )) {
+
+       getSellerByDepartSql();
+       // await CacheHelper.putData(key: 'password', value: password);
+        Navigator.pop(context);
+        emit(UpdateUseSuccessState());
+        // print(value.headers);
+        print(response.data.trim()); // The response from PHP script
+      } else {
+        showToast(text: 'Update error', state: ToastState.ERROR);
+        print('Update failed: ${response.data.trim()}');
+
+      }}catch(error){
+      print(error.toString());
+      showToast(text: error.toString(), state: ToastState.ERROR);
+    }
+
+  }
+  List<Map<String,dynamic>> listOfMapSeller=[];
+
+  Future getSellerByDepartSql()  async {
+    listOfMapSeller=[];
+
+      emit(GetSellerDepartLoadingState());
+      // var url = Uri.parse('https://sjiappeg.sji-eg.com/login.php');// Replace with your PHP script URL
+      try {
+        Response response = await DioHelper.dio.post('getclientbydepart.php',);
+        if (response.statusCode == 200) {
+          var res = json.decode(response.data);
+          if (res.length > 0) {
+            res.forEach((element){
+              listOfMapSeller.add(element);
+            });
+
+
+            emit(GetSellerDepartSuccessState());
+
+              print(listOfMapSeller);
+            print(response.statusCode);
+          } else {
+            emit(GetSellerDepartErrorState(error: " Error  get seller!!!!!!!!! "));
+
+            print('get seller by Depart failed: ${response.data.toString()}');
+          }
+
+        }
+      } catch (error) {
+        emit(GetSellerDepartErrorState(error: "get seller by Depart onError : ${error.toString()}"));
+
+        print('Login onError: ${error.toString()}');
+        print(onError);
+      }
+
 
   }
 

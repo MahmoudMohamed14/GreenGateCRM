@@ -6,7 +6,7 @@ import 'package:greengate/moduls/layoutScreen/design.dart';
 import 'package:greengate/moduls/layoutScreen/layout_cubit.dart';
 import 'package:greengate/moduls/layoutScreen/layout_status.dart';
 import 'package:greengate/moduls/screens/searchScreen.dart';
-class  InterestedScreen extends StatelessWidget {
+class  NumberFalseScreen extends StatelessWidget {
 
 
   final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
@@ -29,29 +29,29 @@ class  InterestedScreen extends StatelessWidget {
                     centerTitle: true,
                     actions: [
                       IconButton(onPressed: (){
-                        navigateTo(context, SearchScreen(cubit.listInterested));
+                        navigateTo(context, SearchScreen(cubit.listNumberFalse));
                         cubit.listOfSearch=[];
 
                       }, icon: Icon(Icons.search,size: 20,))
                     ],
 
-                    title: Text("Interested",
+                    title: Text("False Number",
                         style: TextStyle(color:ColorManager.darkPrimary,
                           fontSize: 20.0,)
                     ),
 
                   ),
-                  body:  cubit.listInterested.isNotEmpty?Padding(
+                  body:  cubit.listNumberFalse.isNotEmpty?Padding(
                     padding: const EdgeInsets.all(20),
                     child: ListView.builder(
                       key: listKey,
 
                         physics: ClampingScrollPhysics(),
-                      itemCount: cubit.listInterested.length,
+                      itemCount: cubit.listNumberFalse.length,
                       scrollDirection: Axis.vertical,
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
-                        return Design.newClentModel(cubit.listInterested[index],context,index);
+                        return Design.newClentModel(cubit.listNumberFalse[index],context,index);
 
                       }
 

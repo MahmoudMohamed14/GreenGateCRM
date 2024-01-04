@@ -15,6 +15,7 @@ class  MonitorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     //TextEditingController? day=new TextEditingController();
 
+
     return Builder(
         builder: (context) {
 
@@ -22,19 +23,20 @@ class  MonitorScreen extends StatelessWidget {
             listener: (context,state){},
             builder: (context,state){
               var cubit=  LayoutCubit.get(context);
-              return  cubit.listSeller.isNotEmpty?Padding(
+              return  cubit.listOfMapSeller.isNotEmpty?Padding(
                 padding: const EdgeInsets.all(20),
-                child: ListView.builder(
+                child: ListView.separated(
                     key: listKey,
 
                     physics: ClampingScrollPhysics(),
-                    itemCount: cubit.listSeller.toSet().toList().length,
+                    itemCount:cubit.listOfMapSeller.length, //cubit.listSeller.toSet().toList().length,
                     scrollDirection: Axis.vertical,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
-                      return Design.sellerDesign(context,cubit.listSeller.toSet().toList()[index]);
+                      return Design.sellerDesign(context,cubit.listOfMapSeller[index]);
 
-                    }
+                    },
+                    separatorBuilder:(context, index)=>SizedBox(height: 20,) ,
 
                 ),
               ):Center(child: CircularProgressIndicator());

@@ -33,7 +33,13 @@ class  LayoutScreen extends StatelessWidget {
         builder: (context) {
 
           return BlocConsumer<LayoutCubit,LayoutStates>(
-            listener: (context,state){},
+            listener: (context,state){
+              if(state is ClientGetErrorState || state is ClientGetSellerErrorState){
+
+                showToast(text: LayoutCubit.get(context).messageResult, state: ToastState.ERROR);
+
+              }
+            },
             builder: (context,state){
               var cubit=  LayoutCubit.get(context);
               return Scaffold(
@@ -41,7 +47,7 @@ class  LayoutScreen extends StatelessWidget {
                     leadingWidth: 100,
                     leading: Row(
                       children: [
-                      IconButton(onPressed: () async {
+                   state is ClientGetLoadingState|| state is ClientGetSellerLoadingState?Icon(Icons.sync,color: Colors.grey,):  IconButton(onPressed: () async {
                         CacheHelper.getData(key: 'control') ?   await cubit.getAllClient():await cubit.getClientBySeller();
                        },icon:const Icon(Icons.sync),),
                        if( CacheHelper.getData(key: 'control') )   IconButton(onPressed: (){
@@ -64,7 +70,7 @@ class  LayoutScreen extends StatelessWidget {
                     actions: [
 
                      cubit.indexHomeButton==1&& !CacheHelper.getData(key: 'control') ?  IconButton(onPressed: (){
-                          navigateTo(context, SearchScreen(cubit.listNotCall));
+                          navigateTo(context, SearchScreen(cubit.listAllClient));
                           cubit.listOfSearch=[];
 
                         }, icon: Icon(Icons.search,size: 20,)):SizedBox(),
