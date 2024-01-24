@@ -21,6 +21,7 @@ class HomeScreen extends StatelessWidget {
     return   BlocConsumer<LayoutCubit,LayoutStates>(
       listener: (context,state){},
     builder: (context,state){
+      var cubit=  LayoutCubit.get(context);
         return Padding(
           padding: const EdgeInsets.all(20),
           child: SingleChildScrollView(
@@ -29,11 +30,13 @@ class HomeScreen extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(child: GestureDetector(onTap: (){
+                      cubit.whereAreFromScreen='Follow Meeting';
                       navigateTo(context,FollowMeetingScreen());
                     },child: Design.layoutDesign(context,'Follow Meeting',LayoutCubit.get(context).listFollowMeeting.length))),
 
                    const   SizedBox(width: 20,),
                     Expanded(child: GestureDetector(onTap: (){
+                      cubit.whereAreFromScreen='Follow UP';
                         navigateTo(context,FollowUpScreen());
                     },child:Design. layoutDesign(context,'Follow UP',LayoutCubit.get(context).listFollowUP.length))),
 
@@ -47,12 +50,14 @@ class HomeScreen extends StatelessWidget {
                   children: [
 
                     Expanded(child: GestureDetector(onTap: (){
+                      cubit.whereAreFromScreen='Fresh Leads';
                       navigateTo(context, FreshLeadScreen ());
                     },child:Design. layoutDesign(context,'Fresh Leads',LayoutCubit.get(context).listFreshLead.length))),
 
 
                     const   SizedBox(width: 20,),
                     Expanded(child: GestureDetector(onTap: (){
+                      cubit.whereAreFromScreen='Done Deal';
 
                       navigateTo(context, DealDoneScreen());
                     },child: Design.layoutDesign(context,'Done Deal',LayoutCubit.get(context).listDealDone.length))),
@@ -64,11 +69,13 @@ class HomeScreen extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(child: GestureDetector(onTap: (){
+                      cubit.whereAreFromScreen='No Answer';
                       navigateTo(context, NotAnswerScreen());
                     },child: Design.layoutDesign(context,'No Answer',LayoutCubit.get(context).listNoAnswer.length))),
 
                     const   SizedBox(width: 20,),
                     Expanded(child: GestureDetector(onTap: (){
+                      cubit.whereAreFromScreen='Not Interested';
                       navigateTo(context, NotInterestedScreen());
                     },child:Design. layoutDesign(context,'Not Interested',LayoutCubit.get(context).listNotInterested.length))),
 
@@ -80,12 +87,14 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     Expanded(child: GestureDetector(onTap: (){
                       navigateTo(context, ClosedScreen());
+                      cubit.whereAreFromScreen='Closed';
 
                       // LayoutCubit.get(context).changeHomeButton(1);
                     },child: Design.layoutDesign(context,'Closed',LayoutCubit.get(context).listClosedCall.length))),
                     const   SizedBox(width: 20,),
 
                     Expanded(child: GestureDetector(onTap: (){
+                      cubit.whereAreFromScreen='False Number';
                       navigateTo(context, NumberFalseScreen());
                     },child:Design. layoutDesign(context,'False Number',LayoutCubit.get(context).listNumberFalse.length))),
 

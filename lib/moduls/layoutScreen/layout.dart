@@ -4,18 +4,21 @@
 
 
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:greengate/moduls/componant/componant.dart';
 import 'package:greengate/moduls/componant/local/cache_helper.dart';
 import 'package:greengate/moduls/constant/color_manager.dart';
+import 'package:greengate/moduls/layoutScreen/addClient.dart';
 import 'package:greengate/moduls/layoutScreen/layout_cubit.dart';
 import 'package:greengate/moduls/layoutScreen/layout_status.dart';
 import 'package:greengate/moduls/screens/searchScreen.dart';
 import 'package:intl/intl.dart';
 
 
-class  LayoutScreen extends StatelessWidget {
+class  LayoutScreen extends StatelessWidget{
 
 
   final GlobalKey<AnimatedListState> listKey = GlobalKey<AnimatedListState>();
@@ -47,7 +50,7 @@ class  LayoutScreen extends StatelessWidget {
                     leadingWidth: 100,
                     leading: Row(
                       children: [
-                   state is ClientGetLoadingState|| state is ClientGetSellerLoadingState?Icon(Icons.sync,color: Colors.grey,):  IconButton(onPressed: () async {
+                    cubit.loadingGet.isEmpty?Icon(Icons.sync,color: Colors.grey,):  IconButton(onPressed: () async {
                         CacheHelper.getData(key: 'control') ?   await cubit.getAllClient():await cubit.getClientBySeller();
                        },icon:const Icon(Icons.sync),),
                        if( CacheHelper.getData(key: 'control') )   IconButton(onPressed: (){
@@ -75,12 +78,12 @@ class  LayoutScreen extends StatelessWidget {
 
                         }, icon: Icon(Icons.search,size: 20,)):SizedBox(),
 
-                      // Platform.isWindows? Padding(
-                      //   padding: const EdgeInsets.symmetric(horizontal: 10),
-                      //   child: IconButton(onPressed: (){
-                      //    navigateTo(context, UploadClientScreen());
-                      //   }, icon: Icon(Icons.file_upload_outlined)),
-                      // ):SizedBox(),
+                      Platform.isWindows? Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: IconButton(onPressed: (){
+                         navigateTo(context, UploadClientScreen());
+                        }, icon: Icon(Icons.file_upload_outlined)),
+                      ):SizedBox(),
                       //this is sign out
                       // Padding(
                       //   padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -89,7 +92,7 @@ class  LayoutScreen extends StatelessWidget {
                       //
                       //     // navigateTo(context, UploadClientScreen());
                       //   }, icon: Icon(Icons.logout_outlined)),
-                      // )
+                      // ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: PopupMenuButton<String>(

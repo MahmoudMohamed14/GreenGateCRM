@@ -25,6 +25,7 @@ void main()async  {
   NotificationService().initNotification(
 
   );
+
   NotificationService.onNotification.stream.listen((event) {
     print(event);
     showToast(text: event+'main', state: ToastState.SUCCESS);
@@ -37,17 +38,24 @@ void main()async  {
   runApp(MyApp(),);
 
 }
-// Future initialization() async {
-//
-//   // print('ready in 3...');
-//   await Future.delayed(const Duration(seconds: 1));
-//   FlutterNativeSplash.remove();
-//
-// }
 
-class MyApp extends StatelessWidget {
+
+class MyApp extends StatelessWidget  with WidgetsBindingObserver  {
   const MyApp({super.key});
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state == AppLifecycleState.resumed){
+      showToast(text: 'resumed', state: ToastState.WARNING);
 
+    }else if(state == AppLifecycleState.inactive){
+      showToast(text: 'INTER', state: ToastState.SUCCESS);
+      // app is inactive
+    }else if(state == AppLifecycleState.paused){
+      showToast(text: 'Paused', state: ToastState.WARNING);
+    }else if(state == AppLifecycleState.detached){
+      showToast(text: 'Delete', state: ToastState.ERROR);
+    }
+  }
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -76,6 +84,7 @@ class MyApp extends StatelessWidget {
 
            debugShowCheckedModeBanner: false,
            theme: getApplicationTheme(context),
+
            home:launcherScreen(iscurrentuser: CacheHelper.getData(key: 'isLogin')??false,homeScreen: LayoutScreen(),loginScreen: LoginScreen()), //LayoutScreen()//const MyHomePage(title: 'Flutter Demo Home Page'),
        ),
      ),

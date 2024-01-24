@@ -2,12 +2,17 @@
 import 'dart:convert';
 import 'dart:io';
 
+
 import 'package:csv/csv.dart';
 import 'package:dio/dio.dart';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_phone_direct_caller/flutter_phone_direct_caller.dart';
 import 'package:greengate/models/clientModel.dart';
+import 'package:greengate/models/errorModel.dart';
 import 'package:greengate/moduls/componant/componant.dart';
 import 'package:greengate/moduls/componant/local/cache_helper.dart';
 import 'package:greengate/moduls/componant/remote/dioHelper.dart';
@@ -38,7 +43,12 @@ String date=DateFormat.yMd().format(DateTime.now());
   pickFileReview({bool isLead = false}) async {
     isFreshLead=isLead;
 
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['csv'],
+      allowMultiple: false,
+    );
+
 
     if (result != null) {
       clientList = [];
@@ -61,7 +71,7 @@ String date=DateFormat.yMd().format(DateTime.now());
 
         clientListModel.add(ClientModel(
 
-          name: fields[i][0].toString().trim(),
+          name: fields[i][0].toString().trim().replaceAll("'", ""),
           phone: fields[i][1].toString().trim(),
           seller: fields[i][2].toString().trim(),
            state: isLead?fields[i][3].toString().trim():'',
@@ -100,7 +110,7 @@ String date=DateFormat.yMd().format(DateTime.now());
 
   }
   double valuepross=0;
-
+List<ErrorModel>listErrorModel=[];
   Future updateValueSql(String ky , {int? id,String? value})  async {
    // String val='';
    // emit(HiringCallLoadingState());
@@ -128,20 +138,106 @@ String date=DateFormat.yMd().format(DateTime.now());
 
   }
   String messageResult='';
-  Future updateclientSql( int? id,String state,String note,dateCall,dateAlarm,context)  async {
+  bool removeFromNoteCall=true;
+  String whereAreFromScreen='';
+  void actionLocal(ClientModel model){
+    
+    if(model.state=='Fresh Leads') {
+
+      listFreshLead.add(model);
+     
+
+    }
+    else if(model.state=='False Number') {
+      listNumberFalse.add(model);
+    }
+    else if(model.state=='Closed') {
+      listClosedCall.add(model);
+    }
+    else if(model.state=='Done Deal') {
+      listDealDone.add(model);
+    }
+    else if(model.state=='No Answer') {
+      listNoAnswer.add(model);
+    }
+    else if(model.state=='Not Interested') {
+      listNotInterested.add(model);
+    }
+    else if(model.state=='Follow UP') {
+      listFollowUP.add(model);
+    }
+    else if(model.state=='Follow Meeting') {
+      listFollowMeeting.add(model);
+    }
+
+    if(removeFromNoteCall){ listNotCall.remove(model);
+    }else{
+      if(whereAreFromScreen=='Fresh Leads') {
+
+        listFreshLead.remove(model);
+
+
+      } 
+      else if(whereAreFromScreen=='False Number') {
+        listNumberFalse.remove(model);
+      }
+      else if(whereAreFromScreen=='Closed') {
+        listClosedCall.remove(model);
+      }
+      else if(whereAreFromScreen=='Done Deal') {
+        listDealDone.remove(model);
+      }
+      else if(whereAreFromScreen=='No Answer') {
+        listNoAnswer.remove(model);
+      }
+      else if(whereAreFromScreen=='Not Interested') {
+        listNotInterested.remove(model);
+      }
+      else if(whereAreFromScreen=='Follow UP') {
+        listFollowUP.remove(model);
+      }
+      else if(whereAreFromScreen=='Follow Meeting') {
+        listFollowMeeting.remove(model);
+      }
+    }
+
+    if(model.dateAlarm!.isNotEmpty && !(DateTime.now().isAfter(DateTime.parse(model.dateAlarm??'')))){ NotificationService().scheduleNotification(
+        id: model.id,
+        title: '${model.name} (${model.phone})',
+        body: '${model.note}',
+        payLoad:'+${model.phone}' ,
+
+        scheduledNotificationDateTime: DateTime.parse(model.dateAlarm??''));
+    //print(element['dateAlarm']);
+    }
+    getEmit();
+  }
+  Future actionClientSql(  id, state,String note,dateCall,dateAlarm,context,model)  async {
   emit(ClientActionLoadingState());
   messageResult='';
     try{
-      Response response=await DioHelper.dio.post('editClient.php',queryParameters: {'id':id,'state':state,'note':note,'dateCall':dateCall,"dateAlarm":dateAlarm});
+      Response response=await DioHelper.dio.post('editClient.php', options:Options(
+         headers: {
+      //'Content-Type': 'application/x-www-form-urlencoded',
+      // Add any other headers if required
+      }
+      ),queryParameters: {'id':id,"state":state,"note":note,"dateCall":dateCall,"dateAlarm":dateAlarm});
       if(response.statusCode==200){
+        print(response.data.toString());
 
 
-        if(response.data.toString().contains('ActionSuccess'))
+        if(response.data.toString().contains('ActionSuccess'))model!.state=state;
+        model!.note=note;
+        model!.dateCall=dateCall;
+        model!.dateAlarm=dateAlarm;
           {
+
+
             messageResult=response.data.toString();
+            actionLocal( model);
             emit(ClientActionSuccessState());
            // Navigator.of(context).pop(true);
-            await getClientBySeller();
+          //  await getClientBySeller();
           }
 
 
@@ -149,13 +245,69 @@ String date=DateFormat.yMd().format(DateTime.now());
         print(response.data);
 
       }else{
+
+        print(response.statusCode.toString()+"*** from else"+response.data.toString());
         messageResult=response.data.toString();
         emit(ClientActionErrorState());
       }
+
+    }catch(error){
+
+      if(error.toString().contains('This exception was thrown because the response has a status code of 403 and RequestOptions.validateStatus was configured to throw for this status code')){
+        actionClientErrorSql(  id, state,note,dateCall,dateAlarm,context,model);
+      }else{
+        messageResult=error.toString();
+        emit(ClientActionErrorState());
+        print("##### from catch"+"Clint Action "+error.toString());
+      }
+      //emit(HiringCallErrorState());
+
+    }
+
+
+
+  }
+  Future actionClientErrorSql(  id, state,String note,dateCall,dateAlarm,context,model)  async {
+    emit(ClientActionLoadingState());
+    messageResult='';
+    try{
+      Response response=await DioHelper.dio.post('editClient.php', options:Options(
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            // Add any other headers if required
+          }
+      ),queryParameters: {'id':id,"state":state,"note":Uri.encodeFull(note),"dateCall":dateCall,"dateAlarm":dateAlarm,'isUrl':'FromNote'});
+      if(response.statusCode==200){
+
+
+        if(response.data.toString().contains('ActionSuccess'))
+        {
+          model!.state=state;
+          model!.note=note;
+          model!.dateCall=dateCall;
+          model!.dateAlarm=dateAlarm;
+          messageResult=response.data.toString();
+          actionLocal( model);
+          emit(ClientActionSuccessState());
+           //Navigator.of(context).pop(true);
+         // await getClientBySeller();
+        }
+
+
+        print("###############################");
+        print(response.data);
+
+      }else{
+
+        print(response.statusCode.toString()+"*** from else"+response.data.toString());
+        messageResult=response.data.toString();
+        emit(ClientActionErrorState());
+      }
+
     }catch(error){
       messageResult=error.toString();
       emit(ClientActionErrorState());
-      print("Clint Action "+error.toString());
+      print("##### from catch"+"Clint Action "+error.toString());
       //emit(HiringCallErrorState());
 
     }
@@ -168,6 +320,7 @@ String date=DateFormat.yMd().format(DateTime.now());
   }
   int indexHomeButton=0;
   void changeHomeButton(ind){
+    ind==1?removeFromNoteCall=true:removeFromNoteCall=false;
 
     indexHomeButton=ind;
     emit(ChangeHomeButton());
@@ -209,12 +362,15 @@ String date=DateFormat.yMd().format(DateTime.now());
   Future insertClienSql()  async {
     emit(AddClientLoadingState());
     valuepross=0;
+    listErrorModel=[];
 
     for(int i=0;i< clientList.length;i++){
 
       try{
         Response response=await DioHelper.dio.post('insertClient.php',queryParameters: clientListModel[i].toMap());
         if(response.statusCode==200){
+         if(!response.data.toString().contains("client inserted successfully")) listErrorModel.add(ErrorModel(id: i+1,phone: clientListModel[i].phone,message: response.data.toString()));
+
           print(i);
           valuepross=(i+1)/clientList.length*100;
           getEmit();
@@ -224,9 +380,15 @@ String date=DateFormat.yMd().format(DateTime.now());
             clientList.clear();
             emit(AddClientSuccessState());
           }
+        }else{
+          listErrorModel.add(ErrorModel(id: i+1,phone: clientListModel[i].phone,message: response.data.toString()));
+          emit(AddClientErrorState());
+
         }
       }catch(error){
+        listErrorModel.add(ErrorModel(id: i+1,phone: clientListModel[i].phone,message: error.toString()));
         emit(AddClientErrorState());
+
         print("Sudden Normal upload "+error.toString());
 
       }
@@ -255,25 +417,28 @@ String date=DateFormat.yMd().format(DateTime.now());
 
   //List<String>listGrid=['Not Call','No Answer Potential','Cold Call','No Answer','Not Interested','Follow UP','Follow Meeting'];
  List<String>listSeller=[];
+ String loadingGet='ok';
   Future<void> getAllClient() async {
     sellerId='';
     messageResult='';
-    listSeller=[];
-    listAllClient=[];
-    listNumberFalse=[];
-    listClosedCall=[];
-    listNoAnswer=[];
-    listNotInterested=[];
-    listFollowUP=[];
-    listDealDone=[];
-    listFollowMeeting=[];
-    listNotCall=[];
-    listFreshLead=[];
+    loadingGet='';
+
     emit(ClientGetLoadingState());
 
     try{
       Response response=await  DioHelper.dio.post('getclient.php' );
       if (response.statusCode == 200 ) {
+        listSeller=[];
+        listAllClient=[];
+        listNumberFalse=[];
+        listClosedCall=[];
+        listNoAnswer=[];
+        listNotInterested=[];
+        listFollowUP=[];
+        listDealDone=[];
+        listFollowMeeting=[];
+        listNotCall=[];
+        listFreshLead=[];
         var res=json.decode(response.data);
         //  showToast(text: value.data.toString(), state: ToastState.SUCCESS);
         if(res.length>0){
@@ -324,6 +489,7 @@ String date=DateFormat.yMd().format(DateTime.now());
 
           //print(res);
           print(listAllClient.length.toString()+"  = lenth");
+          loadingGet='ok';
          emit(ClientGetSuccessState());
           //getMyList();
 
@@ -334,8 +500,11 @@ String date=DateFormat.yMd().format(DateTime.now());
       } else {
         print('Get All Data Error: ${response.data}');
         messageResult=response.data.toString();
+        loadingGet='ok';
+        emit(ClientGetErrorState());
       }
     }catch(onError){
+      loadingGet='ok';
      emit(ClientGetErrorState());
      messageResult=onError.toString();
       print('Get All Data Error: ${onError.toString()}');
@@ -344,21 +513,23 @@ String date=DateFormat.yMd().format(DateTime.now());
 
   }
   Future<void> getClientBySeller() async {
-    listAllClient=[];
-    listNumberFalse=[];
-    listClosedCall=[];
-    listNoAnswer=[];
-    listNotInterested=[];
-    listFollowUP=[];
-    listDealDone=[];
-    listFollowMeeting=[];
-    listNotCall=[];
-    listFreshLead=[];
+    loadingGet='';
+
     emit(ClientGetSellerLoadingState());
     messageResult='';
     try{
       Response response=await  DioHelper.dio.post('getClientid.php',queryParameters:{'seller':"${CacheHelper.getData(key: 'myId')}"} );
       if (response.statusCode == 200 ) {
+        listAllClient=[];
+        listNumberFalse=[];
+        listClosedCall=[];
+        listNoAnswer=[];
+        listNotInterested=[];
+        listFollowUP=[];
+        listDealDone=[];
+        listFollowMeeting=[];
+        listNotCall=[];
+        listFreshLead=[];
 
         var res=json.decode(response.data);
         //  showToast(text: value.data.toString(), state: ToastState.SUCCESS);
@@ -366,7 +537,7 @@ String date=DateFormat.yMd().format(DateTime.now());
 
 
         //  print(res);
-
+        //  emit(ClientGetSellerSuccessState());
           res.forEach((element){
              if(element['state']=='Fresh Leads') {
 
@@ -409,6 +580,7 @@ String date=DateFormat.yMd().format(DateTime.now());
             //myDepartList.add(element['depart']);
           });
           //print(res);
+          loadingGet='ok';
           print(listAllClient.length.toString()+"  = lenth");
           emit(ClientGetSellerSuccessState());
           //getMyList();
@@ -418,11 +590,13 @@ String date=DateFormat.yMd().format(DateTime.now());
         print(response.statusCode);
 
       } else {
+        loadingGet='ok';
         emit(ClientGetSellerErrorState());
         messageResult=response.data.toString();
        // print('Get All Data Error: ${response.data}');
       }
     }catch(onError){
+      loadingGet='ok';
       messageResult=onError.toString();
       emit(ClientGetSellerErrorState());
 
@@ -437,6 +611,11 @@ String date=DateFormat.yMd().format(DateTime.now());
   Future makeCall(String phone) async {
     Uri uri=Uri(scheme: 'tel', path: '${phone}');
     await launchUrl(uri);
+ // return  await FlutterPhoneDirectCaller.callNumber(phone);
+
+
+
+
   }
   int indexSelect=0;
 void  indexOfListSelect(index){

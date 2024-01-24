@@ -1,7 +1,4 @@
 class ClientModel{
-
-
-
   String ?seller;
   String ? name;
   String ?date;
@@ -11,11 +8,10 @@ class ClientModel{
   String ?phone;
   String ?note;
   String ?state;
-  int ?id;
+  String ?isUrl;
+  late int id;
 
-
-
-  ClientModel({this.name, this.phone, this.seller='', this.note='', this.date, this.state='',this.dateCall='',this.dateAlarm=""});
+  ClientModel({this.name, this.phone, this.seller='', this.note='', this.date, this.state='',this.dateCall='',this.dateAlarm="",this.isUrl='false'});
 
   ClientModel.fromJson(Map<String,dynamic>  json){
 
@@ -30,6 +26,7 @@ class ClientModel{
     note=json['note'];
 
     state=json['state'];
+    isUrl=json['isUrl'];
     id=json['id'];
 
   }
@@ -37,7 +34,7 @@ class ClientModel{
     return {
 
       "note": note,
-
+      'isUrl':isUrl,
       "phone":phone,
 
       "name":"$name",

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:greengate/models/clientModel.dart';
@@ -16,20 +18,22 @@ class ActionScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextEditingController? noteControl=new TextEditingController();
-    noteControl.text=model!.note??'';
+    noteControl.text=model!.isUrl=='FromNote'?Uri.decodeFull(model!.note??'') :model!.note??'';
     LayoutCubit.get(context).dropValue= model!.state!.isNotEmpty?model!.state??'No Answer':'No Answer';
     return BlocConsumer<LayoutCubit,LayoutStates>(
         listener: (context,state){
           if(state is ClientActionSuccessState ){
-            showToast(text: 'Action Done Wait TO GET Data', state: ToastState.SUCCESS);
-
+            Navigator.of(context).pop(true);
+            showToast(text: 'Action Done ', state: ToastState.SUCCESS);
 
           }else if(state is ClientGetSellerSuccessState){
-            Navigator.of(context).pop(true);
+          // Navigator.of(context).pop(true);
           }else if(state is ClientActionErrorState||state is ClientGetSellerErrorState){
             if(LayoutCubit.get(context).messageResult.contains("Failed host lookup: 'sjiappeg.sji-eg.com'")){
+
               showToast(text: 'No Internet OR Check Internet', state: ToastState.ERROR);
             }else{
+              if(!Platform.isWindows)
               showToast(text: LayoutCubit.get(context).messageResult, state: ToastState.ERROR);
             }
           }
@@ -42,6 +46,7 @@ class ActionScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Action'),
         centerTitle: true,
+        leading: SizedBox(),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -127,7 +132,12 @@ class ActionScreen extends StatelessWidget {
               defaultEditText(label: 'Note',maxLine: 10,textDirection: 'g',control: noteControl),
             const  SizedBox(height: 20,),
           state is ClientActionLoadingState?CircularProgressIndicator() :   defaultButton(color: ColorManager.primary,onPress: (){
-                cubit.updateclientSql(model!.id,cubit.dropValue, noteControl.text,cubit.date,cubit.alarm,context);
+            // model!.state=cubit.dropValue;
+            // model!.note=noteControl.text;
+            // model!.dateCall=cubit.date;
+            // model!.dateAlarm=cubit.alarm;
+
+                cubit.actionClientSql(model!.id,cubit.dropValue, noteControl.text,cubit.date,cubit.alarm,context,model);
               }, name: 'submit')
             ],
           ),

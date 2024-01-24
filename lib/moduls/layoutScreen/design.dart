@@ -54,26 +54,39 @@ class Design{
 
                          ],),
                      ),
-                     const  Spacer(),
-                     GestureDetector(onTap: () async {
+                     const Spacer(),
+                     GestureDetector(
+                         onTap: () async {
                        await LayoutCubit.get(context).whatsApp(model.phone);
 
-                     },child: const   CircleAvatar(child: Image(image:AssetImage('assets/whats.png'),fit: BoxFit.fill),radius: 12,)),
-                     const SizedBox(width: 10,),
-                     IconButton(onPressed: (){
-                       LayoutCubit.get(context).alarm='';
-                       // LayoutCubit.get(context).whatsApp('+${model.phone}');
-                       LayoutCubit.get(context).indexOfListSelect(index);
-                       LayoutCubit.get(context).makeCall('+${model.phone}').then((value) {
-                         navigateTo(context, ActionScreen(model));
+                     },child: Padding(
+                       padding: const EdgeInsets.only(top: 8),
+                       child: Container(
+                         height: 28
+                         ,width: 28,
 
-                       });
+                         decoration: BoxDecoration(
+                           shape: BoxShape.circle,
+                           image: DecorationImage(image: AssetImage('assets/whats.png'))
+                         ),
+                       )// CircleAvatar(child: Image(image:,fit: BoxFit.fill,color: Colors.grey,),radius: 12,backgroundColor: ColorManager.primary,),
+                     )),
+                     const SizedBox(width: 10,),
+                     IconButton(onPressed: () async {
+
+
+                     await LayoutCubit.get(context).makeCall('+${model.phone}').then((value) {
+                       LayoutCubit.get(context).alarm='';
+                       LayoutCubit.get(context).indexOfListSelect(index);
+                       navigateTo(context, ActionScreen(model));
+                     });
+
 
                      }, icon: Icon(Icons.phone,color:  ColorManager.primary,))
                    ],
                  ),
                  SizedBox(height: 20,),
-                 model.note!.isNotEmpty? Text('${model.note} ',textDirection: TextDirection.rtl,style:  TextStyle(color: LayoutCubit.get(context).indexSelect ==index?ColorManager.white:Colors.grey,)):const SizedBox(),
+                 model.note!.isNotEmpty? Text(model.isUrl=='FromNote'?'${Uri.decodeFull(model.note??'')}':'${model.note} ',textDirection: TextDirection.rtl,style:  TextStyle(color: LayoutCubit.get(context).indexSelect ==index?ColorManager.white:Colors.grey,)):const SizedBox(),
                  SizedBox(height: 20,),
                  defaultButton(onPress: (){
                    LayoutCubit.get(context).alarm='';
